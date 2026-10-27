@@ -1,0 +1,7 @@
+# Caddy holt automatisch ein HTTPS-Zertifikat für die Domain aus .env (DOMAIN=...).
+# Voraussetzung: Der DNS-A/AAAA-Eintrag der Domain zeigt auf den VPS, Ports 80/443 sind offen.
+{$DOMAIN} {
+	encode zstd gzip
+	# Caddy begrenzt die Upload-Größe standardmäßig nicht – auch große Videos gehen durch.
+	reverse_proxy immich-server:2283
+}
