@@ -1,5 +1,6 @@
 .env
 import.env
+*-wg.conf
 library/
 postgres/
 backups/

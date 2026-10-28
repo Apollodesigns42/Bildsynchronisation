@@ -1,0 +1,23 @@
+# Nur nötig, wenn auf dem VPS noch KEIN Webserver Port 80/443 belegt.
+# Sonst die Weiterleitung im vorhandenen Webserver eintragen (docs/reverse-proxy.md).
+name: fotos-proxy
+
+services:
+  caddy:
+    container_name: fotos_caddy
+    image: docker.io/library/caddy:2
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    env_file:
+      - .env
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: always
+
+volumes:
+  caddy-data:
+  caddy-config:

@@ -1,8 +1,8 @@
-# Immich hinter einem bestehenden Webserver
+# Weiterleitung im bestehenden Webserver des VPS
 
-Läuft auf dem VPS bereits ein Webserver auf Port 80/443, bleibt der mitgelieferte Caddy aus
-(`COMPOSE_PROFILES=` leer in `.env`). Immich lauscht dann nur lokal auf `127.0.0.1:2283`
-(bzw. dem Port aus `IMMICH_PORT`). Dein Webserver leitet die Foto-Domain dorthin weiter.
+Läuft auf dem VPS bereits ein Webserver auf Port 80/443, startet `vps/setup.sh` keinen eigenen Caddy.
+Stattdessen trägst du die Foto-Domain in deinem vorhandenen Webserver ein und leitest sie durch den
+WireGuard-Tunnel an Immich auf dem Mini-PC weiter: **Ziel `http://10.77.0.2:2283`**.
 
 Wichtig für alle Varianten:
 - **Keine Upload-Größenbegrenzung** (Videos können mehrere GB haben)
@@ -27,7 +27,7 @@ server {
     send_timeout 600s;
 
     location / {
-        proxy_pass http://127.0.0.1:2283;
+        proxy_pass http://10.77.0.2:2283;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -62,10 +62,10 @@ Module aktivieren: `sudo a2enmod proxy proxy_http proxy_wstunnel headers rewrite
 
     RewriteEngine On
     RewriteCond %{HTTP:Upgrade} =websocket [NC]
-    RewriteRule /(.*) ws://127.0.0.1:2283/$1 [P,L]
+    RewriteRule /(.*) ws://10.77.0.2:2283/$1 [P,L]
 
-    ProxyPass        / http://127.0.0.1:2283/
-    ProxyPassReverse / http://127.0.0.1:2283/
+    ProxyPass        / http://10.77.0.2:2283/
+    ProxyPassReverse / http://10.77.0.2:2283/
 </VirtualHost>
 ```
 
@@ -80,28 +80,20 @@ Im bestehenden Caddyfile ergänzen und Caddy neu laden:
 
 ```
 fotos.example.de {
-	reverse_proxy 127.0.0.1:2283
+	reverse_proxy 10.77.0.2:2283
 }
 ```
 
-Läuft dieser Caddy selbst in Docker, statt `127.0.0.1` die IP des Docker-Hosts verwenden
-(oder beide Container in ein gemeinsames Docker-Netzwerk hängen und `immich_server:2283` nutzen).
+Das funktioniert auch, wenn dieser Caddy in Docker läuft: Container erreichen die Tunnel-Adresse
+über das Routing des VPS.
 
 ## Traefik, Nginx Proxy Manager, Coolify o. Ä. (in Docker)
 
-Diese Proxys erreichen `127.0.0.1` des Hosts nicht. Am einfachsten hängst du `immich-server`
-zusätzlich in das Netzwerk des Proxys und leitest auf `immich_server:2283` weiter.
-Dazu eine Datei `docker-compose.override.yml` neben `docker-compose.yml` anlegen
-(`proxy-netz` durch den Netzwerknamen deines Proxys ersetzen, siehe `docker network ls`):
+Als Ziel `10.77.0.2` mit Port `2283` eintragen (Schema `http`). Docker-Container erreichen die
+Tunnel-Adresse über das Routing des VPS. Im Nginx Proxy Manager zusätzlich „Websockets Support“
+aktivieren und ein SSL-Zertifikat anfordern.
 
-```yaml
-services:
-  immich-server:
-    networks: [default, proxy-netz]
-networks:
-  proxy-netz:
-    external: true
-```
+## Test
 
-Danach `docker compose up -d`. Im Nginx Proxy Manager: Forward Hostname `immich_server`,
-Port `2283`, „Websockets Support“ aktivieren, SSL-Zertifikat anfordern.
+Auf dem VPS muss `curl -sI http://10.77.0.2:2283` eine Antwort von Immich liefern (Tunnel steht).
+Danach `https://fotos.example.de` im Browser öffnen.

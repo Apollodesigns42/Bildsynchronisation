@@ -1,8 +1,9 @@
-# Bildsynchronisation – Immich + Caddy (HTTPS)
+# Bildsynchronisation – Immich auf dem Heimserver (Mini-PC)
 #
 # Basiert auf der offiziellen Immich docker-compose.yml:
 #   https://github.com/immich-app/immich/releases/latest/download/docker-compose.yml
-# Ergänzt um einen Caddy-Reverse-Proxy für HTTPS. Konfiguration in .env.
+# Erreichbar im Heimnetz unter http://<IP des Mini-PCs>:2283 und aus dem Internet
+# über den VPS (HTTPS) → WireGuard-Tunnel → hierher. Konfiguration in .env.
 
 name: immich
 
@@ -20,8 +21,9 @@ services:
     env_file:
       - .env
     ports:
-      # Nur lokal erreichbar – von außen geht alles über den Reverse Proxy (HTTPS).
-      - '127.0.0.1:${IMMICH_PORT:-2283}:2283'
+      # Im Heimnetz und über den WireGuard-Tunnel erreichbar. Die FritzBox gibt den Port
+      # NICHT ins Internet frei – von außen geht alles über den VPS (HTTPS).
+      - '2283:2283'
     depends_on:
       - redis
       - database
@@ -70,28 +72,5 @@ services:
     healthcheck:
       disable: false
 
-  # Reverse Proxy mit automatischem HTTPS-Zertifikat (Let's Encrypt).
-  # Startet nur mit COMPOSE_PROFILES=caddy in .env. Läuft auf dem Server bereits ein
-  # Webserver (nginx, Apache, Traefik …) auf Port 80/443, bleibt Caddy aus – siehe README.
-  caddy:
-    profiles: [caddy]
-    container_name: immich_caddy
-    image: docker.io/library/caddy:2
-    ports:
-      - '80:80'
-      - '443:443'
-      - '443:443/udp'
-    environment:
-      DOMAIN: ${DOMAIN}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    depends_on:
-      - immich-server
-    restart: always
-
 volumes:
   model-cache:
-  caddy-data:
-  caddy-config:

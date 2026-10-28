@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-# Sichert Fotos + Datenbank vom VPS auf ein Ziel (z.B. externe Festplatte, NAS, zweiter Server).
+# Sichert Fotos + Datenbank vom Mini-PC auf ein Ziel (Hetzner Storage Box, USB-Festplatte …).
 #
-# Verwendung:  scripts/backup.sh /mnt/backup/immich
-#              scripts/backup.sh user@backupserver:/backups/immich
+# Verwendung:  ./backup.sh storagebox:immich          # Storage Box (Eintrag in ~/.ssh/config, siehe README)
+#              ./backup.sh /mnt/usb-platte/immich      # USB-Festplatte
+#              BWLIMIT=1500 ./backup.sh storagebox:immich   # Upload auf 1500 KB/s begrenzen
 #
 # Immich legt selbst täglich Datenbank-Dumps unter $UPLOAD_LOCATION/backups an.
 # Dieses Skript erstellt zusätzlich einen aktuellen Dump und spiegelt alles per rsync.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")"
 
-target=${1:?"Ziel angeben, z.B. scripts/backup.sh /mnt/backup/immich"}
+target=${1:?"Ziel angeben, z.B. ./backup.sh storagebox:immich"}
 set -a; source .env; set +a
 
 dump="$UPLOAD_LOCATION/backups/manual-$(date +%Y%m%d-%H%M%S).sql.gz"
@@ -22,7 +23,7 @@ ls -1t "$UPLOAD_LOCATION"/backups/manual-*.sql.gz 2>/dev/null | tail -n +6 | xar
 
 # Thumbnails und transkodierte Videos lassen sich neu erzeugen und werden nicht gesichert.
 echo "Synchronisiere nach $target ..."
-rsync -a --info=progress2 \
+rsync -a --info=progress2 ${BWLIMIT:+--bwlimit="$BWLIMIT"} \
   --exclude 'thumbs/' --exclude 'encoded-video/' \
   "$UPLOAD_LOCATION"/ "$target"/
 
