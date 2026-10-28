@@ -20,9 +20,34 @@ if [[ ! -f .env ]]; then
   upload=${upload:-./library}
   password=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)
 
+  # Läuft schon etwas auf dem Server? Belegte Ports erkennen.
+  port_used() {
+    if command -v ss >/dev/null 2>&1; then
+      ss -Hltn "sport = :$1" | grep -q .
+    else
+      (exec 3<>"/dev/tcp/127.0.0.1/$1") 2>/dev/null
+    fi
+  }
+
+  profiles=caddy
+  if port_used 80 || port_used 443; then
+    echo
+    echo "Port 80/443 ist bereits belegt – vermutlich läuft schon ein Webserver:"
+    ss -Hltnp '( sport = :80 or sport = :443 )' 2>/dev/null | awk '{print "  " $4, $6}' || true
+    echo "Der mitgelieferte Caddy wird daher NICHT gestartet. Leite stattdessen in deinem"
+    echo "bestehenden Webserver die Domain an Immich weiter (Beispiele: docs/reverse-proxy.md)."
+    profiles=
+  fi
+
+  port=2283
+  while port_used "$port"; do port=$((port + 1)); done
+  [[ $port == 2283 ]] || echo "Port 2283 ist belegt – Immich nutzt lokal Port $port."
+
   sed -e "s|^DOMAIN=.*|DOMAIN=${domain}|" \
       -e "s|^UPLOAD_LOCATION=.*|UPLOAD_LOCATION=${upload}|" \
       -e "s|^DB_PASSWORD=.*|DB_PASSWORD=${password}|" \
+      -e "s|^COMPOSE_PROFILES=.*|COMPOSE_PROFILES=${profiles}|" \
+      -e "s|^IMMICH_PORT=.*|IMMICH_PORT=${port}|" \
       .env.example > .env
   chmod 600 .env
   echo ".env angelegt."
@@ -37,5 +62,10 @@ docker compose pull
 docker compose up -d
 
 echo
-echo "Fertig. Nach 1–2 Minuten erreichbar unter: https://${DOMAIN}"
+if [[ ${COMPOSE_PROFILES:-} == *caddy* ]]; then
+  echo "Fertig. Nach 1–2 Minuten erreichbar unter: https://${DOMAIN}"
+else
+  echo "Immich läuft lokal auf http://127.0.0.1:${IMMICH_PORT:-2283}"
+  echo "Jetzt im bestehenden Webserver ${DOMAIN} dorthin weiterleiten: docs/reverse-proxy.md"
+fi
 echo "Der erste Benutzer, der sich dort registriert, wird Administrator."

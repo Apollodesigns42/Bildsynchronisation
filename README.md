@@ -33,6 +33,7 @@ PC-Import ─┘   (443)   (Zertifikat) │                PostgreSQL (Metadaten
 |---|---|
 | `docker-compose.yml` | Offizielle Immich-Dienste + Caddy als HTTPS-Reverse-Proxy |
 | `Caddyfile` | Holt automatisch ein Let's-Encrypt-Zertifikat für deine Domain |
+| `docs/reverse-proxy.md` | Anbindung an einen bereits laufenden Webserver (nginx, Apache, …) |
 | `.env.example` | Vorlage für die Server-Konfiguration |
 | `scripts/install.sh` | Ersteinrichtung auf dem VPS |
 | `scripts/import.sh` / `scripts/import.ps1` | Import von Festplatte, Ordner oder Google-Takeout (Linux/macOS bzw. Windows) |
@@ -61,6 +62,18 @@ cd bildsynchronisation
 # 3. Einrichten und starten (fragt Domain und Speicherort ab, erzeugt ein sicheres DB-Passwort)
 ./scripts/install.sh
 ```
+
+### Läuft auf dem Server schon etwas?
+
+Kein Problem, Immich läuft komplett in eigenen Docker-Containern mit eigener Datenbank und stört
+andere Dienste nicht. Konflikte kann es nur bei Ports geben, und darum kümmert sich `install.sh`:
+
+- **Port 80/443 belegt** (es läuft schon ein Webserver wie nginx, Apache, Traefik …): Der mitgelieferte
+  Caddy wird nicht gestartet. Stattdessen trägst du die Foto-Domain in deinem bestehenden Webserver ein,
+  Anleitungen für nginx, Apache, Caddy und Docker-Proxys stehen in [docs/reverse-proxy.md](docs/reverse-proxy.md).
+- **Port 2283 belegt**: Immich nimmt automatisch den nächsten freien Port (steht dann als `IMMICH_PORT` in `.env`).
+- **Ressourcen**: Immich braucht im Betrieb ca. 2–4 GB RAM, beim ersten Durchlauf der Gesichtserkennung mehr.
+  Mit `free -h` und `df -h` prüfen, ob neben den bestehenden Diensten genug frei ist.
 
 Danach `https://fotos.deinedomain.de` im Browser öffnen. **Der erste registrierte Benutzer wird Administrator.**
 Diesen Schritt direkt nach der Installation erledigen. Weitere Benutzer (z.B. Familie) legst du anschließend unter
