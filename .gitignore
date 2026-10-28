@@ -9,3 +9,4 @@ vps/Caddyfile
 heimserver/backup.env
 heimserver/cloud/config/
 heimserver/cloud/daten/
+*.whl
