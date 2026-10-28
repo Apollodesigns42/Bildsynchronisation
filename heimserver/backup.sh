@@ -68,4 +68,7 @@ if [[ $(date +%u) == 7 ]]; then
   restic check
 fi
 
+# Zeitstempel für check.sh: Das letzte Backup lief vollständig durch.
+mkdir -p /var/lib/heimserver && date +%s > /var/lib/heimserver/backup-ok
+
 echo "== $(date '+%F %T') Backup fertig"

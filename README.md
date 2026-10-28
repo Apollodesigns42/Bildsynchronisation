@@ -55,6 +55,7 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
 | `heimserver/cloud/` | Mini-PC | OpenCloud: `docker-compose.yml` + `install.sh` |
 | `heimserver/tunnel.sh` | Mini-PC | Spielt die WireGuard-Konfiguration ein |
 | `heimserver/backup.sh` | Mini-PC | Nächtliches verschlüsseltes Backup (Fotos + Cloud) auf die Storage Box |
+| `heimserver/check.sh` | Mini-PC | Täglicher Gesundheits-Check mit E-Mail bei Problemen |
 | `heimserver/update.sh` | Mini-PC | Immich und OpenCloud aktualisieren |
 | `vps/setup.sh` | VPS | WireGuard-Tunnel + HTTPS-Weiterleitung (Caddy, falls Port 80/443 frei) |
 | `docs/reverse-proxy.md` | VPS | Weiterleitung, falls auf dem VPS schon ein Webserver läuft |
@@ -336,6 +337,54 @@ sudo bash -c 'set -a; source backup.env; restic mount /mnt/restore'            #
 Für eine komplette Wiederherstellung von Immich siehe [Immich-Doku „Backup and Restore“](https://docs.immich.app/administration/backup-and-restore).
 Der Datenbank-Dump liegt im Backup unter `backups/manual-*.sql.gz`.
 
+## Überwachung per E-Mail
+
+`heimserver/check.sh` prüft jeden Morgen den Mini-PC und schickt dir **nur bei Problemen** eine E-Mail:
+
+| Prüfung | Warnt, wenn … |
+|---|---|
+| SSDs (SMART) | eine SSD Ausfall meldet, Sektoren ersetzt/unlesbar sind oder sie zu ≥ 80 % abgenutzt ist |
+| Backup | das letzte erfolgreiche Backup älter als 30 Stunden ist |
+| Speicherplatz | eine Platte zu ≥ 85 % voll ist |
+| Container | Immich oder OpenCloud nicht läuft |
+| Tunnel | der Mini-PC seit über 5 Minuten keinen Kontakt zum VPS hat |
+| Erreichbarkeit | Fotos oder Cloud aus dem Internet nicht erreichbar sind (prüft die ganze Kette über den VPS) |
+
+Einmal pro Woche (standardmäßig montags) kommt zusätzlich eine „Alles in Ordnung“-Mail. Bleibt sie aus, läuft
+der Check selbst nicht mehr.
+
+**Einrichten:**
+
+1. SMART-Werkzeuge installieren: `sudo apt install smartmontools`
+2. Einstellungen anlegen und ausfüllen (Mail-Zugangsdaten, Foto-Adresse):
+
+   ```bash
+   cd bildsynchronisation/heimserver
+   cp check.env.example check.env
+   chmod 600 check.env          # enthält das Mail-Passwort
+   nano check.env
+   ```
+
+   Am einfachsten verschickt das Skript über dein normales Mail-Konto. Bei GMX musst du dafür in den
+   GMX-Einstellungen unter *E-Mail → POP3/IMAP-Abruf* den Zugriff erlauben. Ist die Zwei-Faktor-Anmeldung aktiv,
+   brauchst du ein App-Passwort.
+
+3. Testen:
+
+   ```bash
+   sudo ./check.sh test       # schickt eine Test-Mail
+   sudo ./check.sh zeigen     # zeigt den aktuellen Bericht ohne Mail
+   ```
+
+4. Täglich um 8 Uhr ausführen (`sudo crontab -e`, unter der Backup-Zeile):
+
+   ```
+   0 8 * * * /home/<benutzer>/bildsynchronisation/heimserver/check.sh >> /var/log/heimserver-check.log 2>&1
+   ```
+
+Fällt der ganze Mini-PC aus (Strom, Defekt), kann er natürlich keine Mail mehr schicken. Dann fehlt die
+wöchentliche „Alles in Ordnung“-Mail, und die Handy-App meldet, dass der Server nicht erreichbar ist.
+
 ## Update
 
 ```bash
@@ -358,6 +407,7 @@ docker compose logs immich-machine-learning    # Gesichtserkennung
 sudo wg show                                   # Tunnel-Status (letzter Handshake < 2 Minuten = ok)
 docker logs opencloud --tail 50                # Cloud-Logs
 sudo ./backup.sh status                        # Backup-Stände
+sudo ./check.sh zeigen                         # Gesundheits-Check
 
 # VPS
 sudo wg show                                   # Tunnel-Status
