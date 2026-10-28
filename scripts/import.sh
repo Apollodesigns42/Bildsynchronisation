@@ -8,13 +8,14 @@
 # Verwendung:
 #   scripts/import.sh ordner  /media/festplatte/Fotos      # Ordnernamen werden zu Alben
 #   scripts/import.sh google  ~/Downloads/takeout-*.zip    # Google-Fotos-Export
+#   scripts/import.sh icloud  ~/Downloads/iCloud-Fotos     # iCloud-Export (privacy.apple.com)
 #   scripts/import.sh ordner  /pfad --dry-run              # nur testen, nichts hochladen
 #
 # Duplikate erkennt der Server automatisch – ein erneuter Import ist unschädlich.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-usage() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
+usage() { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
 [[ $# -ge 2 ]] || usage
 
 command -v immich-go >/dev/null 2>&1 || {
@@ -39,5 +40,7 @@ case $mode in
     exec immich-go upload from-folder "${common[@]}" --folder-as-album=FOLDER ${extra[@]+"${extra[@]}"} "${paths[@]}" ;;
   google|takeout)
     exec immich-go upload from-google-photos "${common[@]}" ${extra[@]+"${extra[@]}"} "${paths[@]}" ;;
+  icloud)
+    exec immich-go upload from-icloud "${common[@]}" ${extra[@]+"${extra[@]}"} "${paths[@]}" ;;
   *) usage ;;
 esac

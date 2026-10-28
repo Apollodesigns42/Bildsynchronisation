@@ -7,9 +7,10 @@
 # Verwendung (PowerShell):
 #   .\scripts\import.ps1 ordner E:\Fotos                     # Ordnernamen werden zu Alben
 #   .\scripts\import.ps1 google C:\Downloads\takeout-001.zip # Google-Fotos-Export
+#   .\scripts\import.ps1 icloud C:\Downloads\iCloud-Fotos     # iCloud-Export (privacy.apple.com)
 #   .\scripts\import.ps1 ordner E:\Fotos --dry-run           # nur testen
 param(
-  [Parameter(Mandatory = $true, Position = 0)][ValidateSet('ordner', 'google')][string]$Modus,
+  [Parameter(Mandatory = $true, Position = 0)][ValidateSet('ordner', 'google', 'icloud')][string]$Modus,
   [Parameter(Mandatory = $true, Position = 1, ValueFromRemainingArguments = $true)][string[]]$Argumente
 )
 $ErrorActionPreference = 'Stop'
@@ -33,7 +34,9 @@ $common = @("--server=$($cfg['IMMICH_SERVER'])", "--api-key=$($cfg['IMMICH_API_K
 
 if ($Modus -eq 'ordner') {
   & $exe upload from-folder @common --folder-as-album=FOLDER @Argumente
-} else {
+} elseif ($Modus -eq 'google') {
   & $exe upload from-google-photos @common @Argumente
+} else {
+  & $exe upload from-icloud @common @Argumente
 }
 exit $LASTEXITCODE

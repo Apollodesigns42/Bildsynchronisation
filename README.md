@@ -158,6 +158,35 @@ Ein abgebrochener Import kann einfach erneut gestartet werden. Bereits hochgelad
 
 Google-Alben werden als Alben übernommen. Aufnahmedatum und Ort kommen aus den JSON-Dateien von Google.
 
+### Umzug aus iCloud
+
+Am einfachsten lädt die Immich-App auf dem iPhone alles direkt hoch (siehe unten, Abschnitt „Abschied von Google Fotos /
+iCloud“). Alternativ: Auf [privacy.apple.com](https://privacy.apple.com) → „Kopie deiner Daten anfordern“ → „iCloud-Fotos“,
+die Teile herunterladen, entpacken und importieren:
+
+```bash
+./scripts/import.sh icloud ~/Downloads/iCloud-Fotos
+```
+
+## Abschied von Google Fotos / iCloud – sichere Reihenfolge
+
+Erst löschen, wenn **alles** nachweislich auf dem Server liegt **und** ein Backup existiert:
+
+1. **Server + Backup einrichten** (`scripts/backup.sh`, siehe unten). Ohne Backup wäre der VPS sonst die einzige Kopie.
+2. **Komplettexport importieren** (Google Takeout bzw. iCloud-Export). In der Cloud liegen oft Bilder, die nicht mehr auf
+   dem Handy sind (alte Handys, „Speicher freigeben“, „iPhone-Speicher optimieren“).
+3. **Handy-App einrichten** und warten, bis der Backup-Bildschirm der App „0 verbleibend“ zeigt.
+4. **Stichproben**: Anzahl der Fotos vergleichen, alte Jahrgänge und Videos öffnen.
+5. **Cloud-Sync abschalten** und einige Wochen parallel laufen lassen. Den Takeout-/iCloud-Export als zusätzliche Kopie aufheben.
+6. **Erst dann in der Cloud löschen**:
+   - **Google**: zuerst in der Google-Fotos-App „Backup“ ausschalten, dann auf [photos.google.com](https://photos.google.com)
+     löschen und danach den Papierkorb leeren. Nicht in der App löschen, das entfernt die Bilder auch vom Handy.
+     Danach die Galerie auf dem Handy kontrollieren.
+   - **iCloud**: Auf dem iPhone *Einstellungen → Apple-ID → iCloud → Fotos* ausschalten und dabei **„Fotos und Videos laden“**
+     wählen, nicht „Vom iPhone entfernen“. Bei aktiver Option „iPhone-Speicher optimieren“ vorher
+     „Laden und Originale behalten“ einstellen und warten, bis alles heruntergeladen ist (Speicherplatz prüfen!).
+     Zum Schluss *iCloud → Speicher verwalten → Fotos → „Deaktivieren und löschen“* (30 Tage Wiederherstellungsfrist).
+
 ## Backup
 
 Eine Foto-Cloud ohne Backup ist kein Backup. Halte mindestens eine zweite Kopie außerhalb des VPS vor.
