@@ -1,8 +1,0 @@
-# Caddy holt automatisch ein HTTPS-Zertifikat für DOMAIN und leitet durch den
-# WireGuard-Tunnel an Immich auf dem Mini-PC weiter (Werte aus vps/.env).
-# Voraussetzung: Der DNS-A/AAAA-Eintrag der Domain zeigt auf den VPS, Ports 80/443 sind offen.
-{$DOMAIN} {
-	encode zstd gzip
-	# Caddy begrenzt die Upload-Größe standardmäßig nicht – auch große Videos gehen durch.
-	reverse_proxy {$IMMICH_UPSTREAM}
-}

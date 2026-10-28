@@ -4,3 +4,8 @@ import.env
 library/
 postgres/
 backups/
+# Von vps/setup.sh erzeugt
+vps/Caddyfile
+heimserver/backup.env
+heimserver/cloud/config/
+heimserver/cloud/daten/

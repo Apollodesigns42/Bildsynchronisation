@@ -1,0 +1,39 @@
+# Eigene Cloud (Ersatz für MEGA, Dropbox …) mit OpenCloud.
+#
+# Vereinfachte Fassung der offiziellen Konfiguration:
+#   https://github.com/opencloud-eu/opencloud-compose (docker-compose.yml + external-proxy/opencloud.yml)
+# HTTPS übernimmt der VPS; hier läuft OpenCloud unverschlüsselt hinter dem WireGuard-Tunnel.
+# Konfiguration in .env.
+
+name: opencloud
+
+services:
+  opencloud:
+    container_name: opencloud
+    image: docker.io/opencloudeu/opencloud:${OC_VERSION:-7}
+    user: '1000:1000'
+    entrypoint: [/bin/sh]
+    # "opencloud init" erzeugt beim ersten Start die Konfiguration mit zufälligen Schlüsseln.
+    # Bei späteren Starts schlägt es fehl, weil sie schon existiert – das ist gewollt.
+    command: ['-c', 'opencloud init || true; opencloud server']
+    environment:
+      OC_URL: https://${OC_DOMAIN}
+      OC_INSECURE: 'false'
+      # Kein TLS zwischen VPS-Proxy und OpenCloud (der Tunnel ist bereits verschlüsselt)
+      PROXY_TLS: 'false'
+      PROXY_HTTP_ADDR: 0.0.0.0:9200
+      # Passwort des Benutzers "admin" – wird nur beim allerersten Start übernommen
+      IDM_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+      IDM_CREATE_DEMO_USERS: 'false'
+      OC_DEFAULT_LANGUAGE: de
+      # Ordner bis 10 GB als ZIP herunterladen
+      FRONTEND_ARCHIVER_MAX_SIZE: '10000000000'
+      # Öffentliche Freigabe-Links nur mit Passwort
+      OC_SHARING_PUBLIC_SHARE_MUST_HAVE_PASSWORD: 'true'
+    volumes:
+      - ${OC_CONFIG_DIR}:/etc/opencloud
+      - ${OC_DATA_DIR}:/var/lib/opencloud
+    ports:
+      # Erreichbar für den VPS über den WireGuard-Tunnel. Die FritzBox gibt den Port NICHT frei.
+      - '9200:9200'
+    restart: always

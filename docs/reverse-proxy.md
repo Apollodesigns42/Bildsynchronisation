@@ -2,7 +2,15 @@
 
 Läuft auf dem VPS bereits ein Webserver auf Port 80/443, startet `vps/setup.sh` keinen eigenen Caddy.
 Stattdessen trägst du die Foto-Domain in deinem vorhandenen Webserver ein und leitest sie durch den
-WireGuard-Tunnel an Immich auf dem Mini-PC weiter: **Ziel `http://10.77.0.2:2283`**.
+WireGuard-Tunnel an den Mini-PC weiter:
+
+| Domain | Ziel |
+|---|---|
+| Fotos (Immich) | `http://10.77.0.2:2283` |
+| Cloud (OpenCloud) | `http://10.77.0.2:9200` |
+
+Die Beispiele unten zeigen die Foto-Domain. Für die Cloud legst du einen zweiten, gleich aufgebauten Eintrag mit
+der Cloud-Domain und Port **9200** an.
 
 Wichtig für alle Varianten:
 - **Keine Upload-Größenbegrenzung** (Videos können mehrere GB haben)

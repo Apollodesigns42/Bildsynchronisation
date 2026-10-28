@@ -16,7 +16,8 @@ fi
 if [[ ! -f .env ]]; then
   read -rp "Speicherort für Fotos [./library]: " upload
   upload=${upload:-./library}
-  password=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32)
+  # Ohne Pipe, sonst bricht "set -o pipefail" ab, wenn head die Pipe schließt
+  password=$(LC_ALL=C tr -dc 'A-Za-z0-9' < <(head -c 2000 /dev/urandom)); password=${password:0:32}
 
   sed -e "s|^UPLOAD_LOCATION=.*|UPLOAD_LOCATION=${upload}|" \
       -e "s|^DB_PASSWORD=.*|DB_PASSWORD=${password}|" \

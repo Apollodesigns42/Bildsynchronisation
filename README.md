@@ -1,9 +1,13 @@
-# Bildsynchronisation – eigene Foto-Cloud statt Google Fotos
+# Bildsynchronisation – eigene Foto-Cloud und Cloud-Speicher
 
-Dieses Repository richtet eine eigene Foto-Cloud ein, die Google Fotos und iCloud Fotos ersetzt.
-Grundlage ist **[Immich](https://immich.app)**, ein aktiv entwickeltes Open-Source-Projekt, das für genau diesen
-Zweck gebaut ist. Immich läuft auf einem **Mini-PC bei dir zu Hause**. Dein **VPS** stellt die Adresse im Internet
-(HTTPS) bereit und leitet über einen verschlüsselten Tunnel nach Hause weiter. Ein Backup geht jede Nacht auf eine
+Dieses Repository richtet eine eigene Foto-Cloud ein, die Google Fotos und iCloud Fotos ersetzt, und optional einen
+eigenen Cloud-Speicher als Ersatz für MEGA, Dropbox & Co.
+
+- **Fotos**: **[Immich](https://immich.app)**, ein aktiv entwickeltes Open-Source-Projekt, das genau für diesen Zweck gebaut ist
+- **Dateien**: **[OpenCloud](https://opencloud.eu)**, eine schlanke Open-Source-Dateicloud mit PC-Sync-Programm und Handy-Apps
+
+Beides läuft auf einem **Mini-PC bei dir zu Hause**. Dein **VPS** stellt die Adressen im Internet (HTTPS) bereit und
+leitet über einen verschlüsselten Tunnel nach Hause weiter. Ein **verschlüsseltes Backup** geht jede Nacht auf eine
 **Hetzner Storage Box**.
 
 ## Was du bekommst
@@ -18,32 +22,40 @@ Zweck gebaut ist. Immich läuft auf einem **Mini-PC bei dir zu Hause**. Dein **V
 | Import aus Google Fotos / iCloud | Takeout- bzw. iCloud-Export inkl. Alben, Aufnahmedaten und Ortsdaten |
 | Ansicht auf Handy und PC | Responsive Weboberfläche im Browser + native Apps, daheim und unterwegs |
 | Extras | Suche per Beschreibung („Hund am Strand“), Alben teilen, Partner-Freigabe, Videos, RAW-Dateien |
+| Eigener Cloud-Speicher statt MEGA | OpenCloud: Ordner-Sync auf PC/Mac, Handy-Apps, Weboberfläche, Freigabe-Links mit Passwort |
+| Backup | Nächtlich, verschlüsselt und mit mehreren Versionen (restic) auf die Hetzner Storage Box |
 
-Die Fotos liegen physisch bei dir zu Hause. Die KI-Auswertung läuft lokal, nichts geht an Dritte.
+Die Daten liegen physisch bei dir zu Hause. Die KI-Auswertung läuft lokal, nichts geht an Dritte.
 
 ## Aufbau
 
 ```
                      unterwegs                                   daheim (FritzBox, keine Portfreigabe nötig)
-Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══►  Mini-PC: Immich, Fotos, Gesichtserkennung
-                        fotos.deine-domain.de                    ▲                          │
-                        nur Weiterleitung                        │ Heimnetz direkt          │ nachts Backup
-                                                       Handy im WLAN, PC-Import             ▼
-                                                                                  Hetzner Storage Box
+Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══►  Mini-PC
+                        fotos.deine-domain.de ──────────────►    Immich    (Port 2283)
+                        cloud.deine-domain.de ──────────────►    OpenCloud (Port 9200)
+                        nur Weiterleitung                               │
+                                                                        │ nachts, verschlüsselt
+                                                                        ▼
+                                                               Hetzner Storage Box
 ```
 
 - Der **Mini-PC baut den Tunnel selbst zum VPS auf**. An der FritzBox muss nichts freigegeben werden.
-- Über den Tunnel erreicht der VPS **nur Immich** (Port 2283), nicht SSH oder andere Dienste des Mini-PCs.
-- Im Heimnetz sprechen Handy und PC den Mini-PC direkt an. Das ist schnell und belastet den Internet-Upload nicht.
-- Unterwegs reicht der Upload deines Anschlusses (z.B. 20 Mbit/s) gut für Vorschaubilder, Fotos und Videos in 720p.
+- Über den Tunnel erreicht der VPS **nur Immich und OpenCloud**, nicht SSH oder andere Dienste des Mini-PCs.
+- **Fotos** sprechen Handy und PC im Heimnetz direkt an. Das ist schnell und belastet den Internet-Upload nicht.
+- **Cloud-Dateien** laufen immer über die Domain, auch daheim. OpenCloud braucht für die Anmeldung immer dieselbe
+  Adresse. Daheim ist der Cloud-Zugriff deshalb auf etwa die Upload-Geschwindigkeit des Anschlusses begrenzt
+  (20 Mbit/s ≈ 2,5 MB/s). Für Dokumente merkt man das nicht. Der erste Upload von 40 GB dauert etwa 5 Stunden.
+- Unterwegs reicht der Upload deines Anschlusses gut für Vorschaubilder, Fotos, Videos in 720p und Dokumente.
 
 | Ordner / Datei | Läuft auf | Zweck |
 |---|---|---|
 | `heimserver/docker-compose.yml` | Mini-PC | Offizielle Immich-Dienste |
-| `heimserver/install.sh` | Mini-PC | Ersteinrichtung, erzeugt `.env` mit sicherem DB-Passwort |
+| `heimserver/install.sh` | Mini-PC | Ersteinrichtung Immich, erzeugt `.env` mit sicherem DB-Passwort |
+| `heimserver/cloud/` | Mini-PC | OpenCloud: `docker-compose.yml` + `install.sh` |
 | `heimserver/tunnel.sh` | Mini-PC | Spielt die WireGuard-Konfiguration ein |
-| `heimserver/backup.sh` | Mini-PC | Nächtliche Sicherung auf die Storage Box |
-| `heimserver/update.sh` | Mini-PC | Immich aktualisieren |
+| `heimserver/backup.sh` | Mini-PC | Nächtliches verschlüsseltes Backup (Fotos + Cloud) auf die Storage Box |
+| `heimserver/update.sh` | Mini-PC | Immich und OpenCloud aktualisieren |
 | `vps/setup.sh` | VPS | WireGuard-Tunnel + HTTPS-Weiterleitung (Caddy, falls Port 80/443 frei) |
 | `docs/reverse-proxy.md` | VPS | Weiterleitung, falls auf dem VPS schon ein Webserver läuft |
 | `scripts/import.sh` / `scripts/import.ps1` | dein PC | Import von Festplatte, Google-Takeout oder iCloud-Export |
@@ -54,9 +66,9 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
 
 | | Empfehlung |
 |---|---|
-| RAM | **16 GB** (8 GB gehen auch, 16 GB lassen Luft für die Gesichtserkennung) |
+| RAM | **8 GB** reichen für Immich + OpenCloud (zusammen ca. 4–6 GB), **16 GB** lassen Luft für weitere Dienste |
 | System-SSD | eingebaut, 256–512 GB reichen |
-| Foto-Speicher | **1–2 TB SSD**. Ideal ist ein Modell mit freiem 2,5"-SATA- oder zweitem M.2-Steckplatz. Bei 150 GB Fotos reicht 1 TB viele Jahre, 2 TB geben Reserve. |
+| Daten-SSD | **1–2 TB SSD**. Ideal ist ein Modell mit freiem 2,5"-SATA- oder zweitem M.2-Steckplatz. Bei 150 GB Fotos + 40 GB Cloud reicht 1 TB einige Jahre, 2 TB geben Reserve. |
 | Preis | ca. 150–220 € + ca. 60–120 € für die SSD |
 | Strom | ca. 6–10 W, das sind etwa 20–25 € pro Jahr |
 
@@ -65,7 +77,8 @@ Gehäuse kostet er kaum weniger.
 
 **Hetzner Storage Box** BX11 (1 TB, ca. 4 €/Monat) für das Backup außer Haus.
 
-**Domain**: eine Subdomain wie `fotos.deine-domain.de`, deren DNS-A-Eintrag auf die IP des VPS zeigt.
+**Domains**: zwei Subdomains wie `fotos.deine-domain.de` und `cloud.deine-domain.de`, deren DNS-A-Einträge auf die IP
+des VPS zeigen.
 
 ## Installation
 
@@ -73,7 +86,7 @@ Gehäuse kostet er kaum weniger.
 
 1. **Ubuntu Server 24.04 LTS** installieren (USB-Stick mit [Ubuntu Server](https://ubuntu.com/download/server)).
    Dabei „OpenSSH Server“ ankreuzen, dann geht alles Weitere bequem vom Desktop-PC aus per `ssh`.
-2. Die Foto-SSD formatieren und dauerhaft einhängen, z.B. unter `/mnt/fotos`
+2. Die Daten-SSD formatieren und dauerhaft einhängen, z.B. unter `/mnt/daten`
    (Anleitung: [Ubuntu-Wiki fstab](https://wiki.ubuntuusers.de/fstab/)).
 3. **FritzBox**: *Heimnetz → Netzwerk → Mini-PC bearbeiten →* „Diesem Netzwerkgerät immer die gleiche IPv4-Adresse
    zuweisen“. Eine Portfreigabe ist **nicht** nötig.
@@ -88,7 +101,7 @@ sudo usermod -aG docker $USER && newgrp docker
 
 git clone https://github.com/apollodesigns42/bildsynchronisation.git
 cd bildsynchronisation/heimserver
-./install.sh            # Speicherort für Fotos: /mnt/fotos
+./install.sh            # Speicherort für Fotos: /mnt/daten/fotos
 ```
 
 Danach im Browser `http://<IP des Mini-PCs>:2283` öffnen und **sofort registrieren. Der erste Benutzer wird
@@ -96,7 +109,7 @@ Administrator.** Weitere Benutzer (z.B. Familie) legst du anschließend unter *A
 
 ### 3. VPS: Tunnel und HTTPS einrichten
 
-**DNS**: Beim Domain-Anbieter einen A-Eintrag `fotos` → IP des VPS anlegen.
+**DNS**: Beim Domain-Anbieter A-Einträge `fotos` und `cloud` → IP des VPS anlegen.
 
 **IONOS-Firewall**: Im IONOS Cloud Panel unter *Netzwerk → Firewall-Richtlinien* den Port **UDP 51820** freigeben.
 Für Caddy zusätzlich TCP 80 und 443, sofern noch nicht offen. `setup.sh` zeigt am Ende den genauen Port an.
@@ -104,7 +117,7 @@ Für Caddy zusätzlich TCP 80 und 443, sofern noch nicht offen. `setup.sh` zeigt
 ```bash
 git clone https://github.com/apollodesigns42/bildsynchronisation.git
 cd bildsynchronisation/vps
-sudo ./setup.sh         # fragt die Domain ab
+sudo ./setup.sh         # fragt Foto- und Cloud-Domain ab (Cloud kann auch später ergänzt werden)
 ```
 
 Das Skript:
@@ -127,7 +140,32 @@ rm ~/heimserver-wg.conf               # enthält einen privaten Schlüssel
 
 Danach die Datei auch auf dem VPS löschen. Jetzt ist `https://fotos.deine-domain.de` von überall erreichbar.
 
-### 5. Empfohlene Einstellungen nach dem ersten Login
+### 5. Cloud (OpenCloud) einrichten
+
+```bash
+cd bildsynchronisation/heimserver/cloud
+./install.sh            # Domain: cloud.deine-domain.de, Speicherort: /mnt/daten/cloud
+```
+
+Das Skript zeigt das **Admin-Passwort** einmal an, speichere es im Passwortmanager. Hast du die Cloud-Domain beim
+VPS-Setup noch nicht angegeben, führst du `sudo vps/setup.sh` erneut aus und trägst sie nach.
+
+Dann `https://cloud.deine-domain.de` öffnen und als `admin` anmelden. Am besten legst du unter *Benutzer* einen
+persönlichen Benutzer für den Alltag an und nutzt `admin` nur für die Verwaltung.
+
+**Programme:** OpenCloud Desktop für Windows, macOS und Linux sowie die OpenCloud-Apps für Android und iOS gibt es
+unter [opencloud.eu](https://opencloud.eu/de). Im PC-Programm wählst du Ordner aus, die synchronisiert werden, wie bei MEGA.
+
+**Umzug von MEGA:**
+1. Im MEGA-Programm sicherstellen, dass alle Dateien lokal auf dem PC liegen (Sync-Ordner vollständig heruntergeladen).
+2. OpenCloud Desktop installieren, anmelden und einen Sync-Ordner anlegen.
+3. Die Dateien aus dem MEGA-Ordner in den OpenCloud-Ordner **kopieren**. Der erste Upload läuft über Nacht.
+4. Stichproben in der OpenCloud-Weboberfläche machen, dann einige Wochen parallel laufen lassen und erst danach MEGA kündigen.
+
+Freigabe-Links sind standardmäßig nur mit Passwort möglich. Die Foto-Sicherung der OpenCloud-App bleibt aus, darum
+kümmert sich Immich.
+
+### 6. Empfohlene Immich-Einstellungen nach dem ersten Login
 
 Unter *Administration → Einstellungen*:
 
@@ -233,15 +271,21 @@ Erst löschen, wenn **alles** nachweislich auf dem Server liegt **und** ein Back
 
 ## Backup auf die Hetzner Storage Box
 
-Eine Foto-Cloud ohne Backup ist kein Backup. Der Mini-PC sichert jede Nacht auf die Storage Box.
+Eine Cloud ohne Backup ist kein Backup. Der Mini-PC sichert jede Nacht Fotos, Datenbank und Cloud-Dateien mit
+**[restic](https://restic.net)** auf die Storage Box:
 
-**Einmalig einrichten** (auf dem Mini-PC, als root, weil die Immich-Dateien root gehören):
+- **verschlüsselt**: Hetzner sieht nur unlesbare Daten
+- **mit Versionen**: 7 tägliche, 4 wöchentliche und 12 monatliche Stände. Auch versehentlich gelöschte oder
+  überschriebene Dateien lassen sich wiederherstellen.
+- **inkrementell**: Nach dem ersten Lauf werden nur Änderungen übertragen.
 
-1. In der Hetzner Console bei der Storage Box **SSH-Support** und **externe Erreichbarkeit** aktivieren, außerdem
-   **automatische Snapshots** (z.B. täglich, 14 behalten). Die Snapshots schützen auch vor versehentlichem Löschen.
-2. SSH-Schlüssel anlegen und hinterlegen (`uXXXXXX` = dein Storage-Box-Benutzer):
+**Einmalig einrichten** (auf dem Mini-PC, als root, weil die Daten root bzw. dem Container gehören):
+
+1. In der Hetzner Console bei der Storage Box **SSH-Support** und **externe Erreichbarkeit** aktivieren.
+2. restic installieren, einen SSH-Schlüssel anlegen und hinterlegen (`uXXXXXX` = dein Storage-Box-Benutzer):
 
    ```bash
+   sudo apt install restic
    sudo ssh-keygen -t ed25519 -N "" -f /root/.ssh/id_ed25519
    sudo ssh-copy-id -p 23 -s -i /root/.ssh/id_ed25519 uXXXXXX@uXXXXXX.your-storagebox.de
    ```
@@ -255,25 +299,42 @@ Eine Foto-Cloud ohne Backup ist kein Backup. Der Mini-PC sichert jede Nacht auf 
        Port 23
    ```
 
-4. Erstes Backup starten. Bei 150 GB und 20 Mbit/s Upload dauert es etwa einen Tag. Mit `BWLIMIT` bleibt
-   daneben genug Upload für den normalen Gebrauch übrig:
+4. Backup-Einstellungen anlegen und das verschlüsselte Repository erzeugen:
 
    ```bash
    cd bildsynchronisation/heimserver
-   sudo BWLIMIT=1500 ./backup.sh storagebox:immich
+   cp backup.env.example backup.env
+   sudo ./backup.sh init
    ```
 
-5. Automatisch jede Nacht um 3 Uhr (`sudo crontab -e`):
+   Das Skript zeigt das **Backup-Passwort** an. **Speichere es im Passwortmanager.** Geht der Mini-PC kaputt, ist
+   es der einzige Weg an die Daten. Ohne Passwort ist das Backup wertlos.
+
+5. Erstes Backup starten. Bei ca. 190 GB und der Begrenzung auf 1500 KiB/s (`BWLIMIT` in `backup.env`) dauert es
+   etwa 1,5 Tage. Daneben bleibt genug Upload für den normalen Gebrauch. Während das Cloud-Backup läuft, ist
+   OpenCloud kurz angehalten, beim ersten Mal ein paar Stunden, danach Minuten. Starte es deshalb abends.
+
+   ```bash
+   sudo ./backup.sh
+   ```
+
+6. Automatisch jede Nacht um 3 Uhr (`sudo crontab -e`):
 
    ```
-   0 3 * * * /home/<benutzer>/bildsynchronisation/heimserver/backup.sh storagebox:immich >> /var/log/immich-backup.log 2>&1
+   0 3 * * * /home/<benutzer>/bildsynchronisation/heimserver/backup.sh >> /var/log/heimserver-backup.log 2>&1
    ```
 
-Danach werden nur noch neue Dateien übertragen. Das Skript erstellt vorher einen aktuellen Datenbank-Dump und
-sichert Originale, Datenbank-Dumps und Profilbilder. Vorschaubilder und umgewandelte Videos lässt es aus, Immich
-erzeugt sie bei Bedarf neu. Zusätzlich auf eine USB-Festplatte geht es mit `sudo ./backup.sh /media/usb-platte/immich`.
+`sudo ./backup.sh status` zeigt alle vorhandenen Backup-Stände.
 
-Wiederherstellung der Datenbank: siehe [Immich-Doku „Backup and Restore“](https://docs.immich.app/administration/backup-and-restore).
+**Wiederherstellen**, z.B. eine versehentlich gelöschte Cloud-Datei:
+
+```bash
+sudo bash -c 'set -a; source backup.env; restic snapshots --tag opencloud'     # Stände anzeigen
+sudo bash -c 'set -a; source backup.env; restic mount /mnt/restore'            # alle Stände als Ordner durchsuchen
+```
+
+Für eine komplette Wiederherstellung von Immich siehe [Immich-Doku „Backup and Restore“](https://docs.immich.app/administration/backup-and-restore).
+Der Datenbank-Dump liegt im Backup unter `backups/manual-*.sql.gz`.
 
 ## Update
 
@@ -281,7 +342,8 @@ Wiederherstellung der Datenbank: siehe [Immich-Doku „Backup and Restore“](ht
 cd bildsynchronisation/heimserver && ./update.sh
 ```
 
-`IMMICH_VERSION=v3` in `.env` aktualisiert automatisch innerhalb der Hauptversion 3. Vor einem Wechsel auf eine neue
+Das aktualisiert Immich und OpenCloud. `IMMICH_VERSION=v3` bzw. `OC_VERSION=7` in den `.env`-Dateien aktualisieren
+automatisch innerhalb der jeweiligen Hauptversion. Vor einem Wechsel auf eine neue
 Hauptversion die [Release Notes](https://github.com/immich-app/immich/releases) lesen und vorher ein Backup machen.
 Das Betriebssystem hältst du mit `sudo apt update && sudo apt upgrade` aktuell. Für automatische
 Sicherheitsupdates `sudo apt install unattended-upgrades` auf Mini-PC und VPS.
@@ -294,10 +356,13 @@ docker compose ps                              # Status aller Dienste
 docker compose logs -f immich-server           # Server-Logs
 docker compose logs immich-machine-learning    # Gesichtserkennung
 sudo wg show                                   # Tunnel-Status (letzter Handshake < 2 Minuten = ok)
+docker logs opencloud --tail 50                # Cloud-Logs
+sudo ./backup.sh status                        # Backup-Stände
 
 # VPS
 sudo wg show                                   # Tunnel-Status
 curl -sI http://10.77.0.2:2283                 # Erreicht der VPS Immich durch den Tunnel?
+curl -sI http://10.77.0.2:9200                 # … und OpenCloud?
 cd bildsynchronisation/vps && docker compose logs caddy   # HTTPS/Zertifikat (falls Caddy genutzt wird)
 ```
 
@@ -308,6 +373,9 @@ cd bildsynchronisation/vps && docker compose logs caddy   # HTTPS/Zertifikat (fa
   (`sudo systemctl status wg-quick@wg-fotos`). Steht der Tunnel, aber die Seite lädt nicht: `curl -sI http://10.77.0.2:2283`
   auf dem VPS prüfen, dann die Webserver-Konfiguration ([docs/reverse-proxy.md](docs/reverse-proxy.md)).
 - **Zertifikatsfehler**: DNS-Eintrag prüfen (`dig fotos.deine-domain.de`), sind TCP 80/443 in der IONOS-Firewall offen?
+- **Cloud-Anmeldung schlägt fehl / Endlosschleife**: OpenCloud muss immer über `https://cloud.deine-domain.de`
+  aufgerufen werden, nicht über die IP des Mini-PCs. `OC_DOMAIN` in `heimserver/cloud/.env` muss genau dieser Domain
+  entsprechen.
 - **Gesichter werden nicht erkannt**: *Administration → Aufträge → Gesichtserkennung → Fehlende*.
 - **Falsches Datum bei alten Bildern**: Fehlen EXIF-Daten, liest immich-go das Datum aus dem Dateinamen. In der
   Weboberfläche lässt sich das Datum mehrerer Bilder gleichzeitig korrigieren (Auswahl → „Datum ändern“).
