@@ -17,6 +17,9 @@ services:
     volumes:
       # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
       - ${UPLOAD_LOCATION}:/data
+      # Vorschaubilder separat, z.B. auf der schnellen System-SSD, während die Originale auf einer
+      # (langsameren) Festplatte liegen. Ohne THUMB_LOCATION bleiben sie unter UPLOAD_LOCATION/thumbs.
+      - ${THUMB_LOCATION:-${UPLOAD_LOCATION}/thumbs}:/data/thumbs
       - /etc/localtime:/etc/localtime:ro
     env_file:
       - .env

@@ -69,7 +69,7 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
 |---|---|
 | RAM | **8 GB** reichen für Immich + OpenCloud (zusammen ca. 4–6 GB), **16 GB** lassen Luft für weitere Dienste |
 | System-SSD | eingebaut, 256–512 GB reichen |
-| Daten-SSD | **1–2 TB SSD**. Ideal ist ein Modell mit freiem 2,5"-SATA- oder zweitem M.2-Steckplatz. Bei 150 GB Fotos + 40 GB Cloud reicht 1 TB einige Jahre, 2 TB geben Reserve. |
+| Daten-Platte | **1–2 TB**. Ideal ist ein Modell mit zweitem Steckplatz (2,5"-SATA oder M.2). Eine Festplatte (HDD) reicht völlig, das Internet ist ohnehin langsamer; Datenbank und Vorschaubilder liegen auf der System-SSD. Eine SSD ist nur leiser und sparsamer. Bei 150 GB Fotos + 40 GB Cloud reicht 1 TB einige Jahre. |
 | Preis | ca. 150–220 € + ca. 60–120 € für die SSD |
 | Strom | ca. 6–10 W, das sind etwa 20–25 € pro Jahr |
 
@@ -87,7 +87,7 @@ des VPS zeigen.
 
 1. **Ubuntu Server 24.04 LTS** installieren (USB-Stick mit [Ubuntu Server](https://ubuntu.com/download/server)).
    Dabei „OpenSSH Server“ ankreuzen, dann geht alles Weitere bequem vom Desktop-PC aus per `ssh`.
-2. Die Daten-SSD formatieren und dauerhaft einhängen, z.B. unter `/mnt/daten`
+2. Die Daten-Platte formatieren und dauerhaft einhängen, z.B. unter `/mnt/daten`
    (Anleitung: [Ubuntu-Wiki fstab](https://wiki.ubuntuusers.de/fstab/)).
 3. **FritzBox**: *Heimnetz → Netzwerk → Mini-PC bearbeiten →* „Diesem Netzwerkgerät immer die gleiche IPv4-Adresse
    zuweisen“. Eine Portfreigabe ist **nicht** nötig.
@@ -104,6 +104,9 @@ git clone https://github.com/apollodesigns42/bildsynchronisation.git
 cd bildsynchronisation/heimserver
 ./install.sh            # Speicherort für Fotos: /mnt/daten/fotos
 ```
+
+Datenbank (`postgres/`) und Vorschaubilder (`thumbs/`) bleiben im Repo-Ordner auf der System-SSD, nur die
+Originale landen auf der Daten-Platte. So bleibt die Zeitleiste flott, auch wenn die Daten-Platte eine Festplatte ist.
 
 Danach im Browser `http://<IP des Mini-PCs>:2283` öffnen und **sofort registrieren. Der erste Benutzer wird
 Administrator.** Weitere Benutzer (z.B. Familie) legst du anschließend unter *Administration → Benutzer* an.

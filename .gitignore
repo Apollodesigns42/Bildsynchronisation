@@ -11,3 +11,4 @@ heimserver/cloud/config/
 heimserver/cloud/daten/
 *.whl
 heimserver/check.env
+thumbs/

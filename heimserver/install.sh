@@ -29,7 +29,7 @@ else
 fi
 
 set -a; source .env; set +a
-mkdir -p "$UPLOAD_LOCATION" "$DB_DATA_LOCATION"
+mkdir -p "$UPLOAD_LOCATION" "$DB_DATA_LOCATION" "${THUMB_LOCATION:-$UPLOAD_LOCATION/thumbs}"
 
 docker compose pull
 docker compose up -d
