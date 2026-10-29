@@ -85,7 +85,7 @@ des VPS zeigen.
 
 ### 1. Mini-PC vorbereiten
 
-1. **Ubuntu Server 24.04 LTS** installieren (USB-Stick mit [Ubuntu Server](https://ubuntu.com/download/server)).
+1. **Ubuntu Server 26.04 LTS** (aktuelle Langzeitversion, Updates bis 2031) installieren (USB-Stick mit [Ubuntu Server](https://ubuntu.com/download/server)).
    Dabei „OpenSSH Server“ ankreuzen, dann geht alles Weitere bequem vom Desktop-PC aus per `ssh`.
 2. Die Daten-Platte formatieren und dauerhaft einhängen, z.B. unter `/mnt/daten`
    (Anleitung: [Ubuntu-Wiki fstab](https://wiki.ubuntuusers.de/fstab/)).
