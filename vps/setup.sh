@@ -17,10 +17,12 @@ CONF=/etc/wireguard/$IFACE.conf
 HOME_CONF=heimserver-wg.conf
 PHOTOS_UPSTREAM=$HOME_TUNNEL_IP:2283
 CLOUD_UPSTREAM=$HOME_TUNNEL_IP:9200
+DOCS_UPSTREAM=$HOME_TUNNEL_IP:8000
 
 read -rp "Domain für die Fotos (z.B. fotos.example.de): " domain
 [[ -n "$domain" ]] || { echo "Keine Domain angegeben."; exit 1; }
 read -rp "Domain für die Cloud (z.B. cloud.example.de, leer = keine Cloud): " cloud_domain
+read -rp "Domain für die Dokumente (z.B. dokumente.example.de, leer = keine): " docs_domain
 
 port_used() {  # $1 = Port, $2 = t (TCP) oder u (UDP)
   if command -v ss >/dev/null 2>&1; then
@@ -62,7 +64,7 @@ CONF
 [Interface]
 Address = $HOME_TUNNEL_IP/24
 PrivateKey = $home_key
-# Über den Tunnel sind nur die Docker-Dienste (Immich 2283, Cloud 9200) erreichbar – SSH und
+# Über den Tunnel sind nur die Docker-Dienste (Immich 2283, Cloud 9200, Dokumente 8000) erreichbar – SSH und
 # andere Dienste des Mini-PCs bleiben für den VPS gesperrt. (Docker-Ports laufen über FORWARD, nicht INPUT.)
 PostUp = iptables -I INPUT -i %i -m conntrack --ctstate NEW -j DROP
 PostDown = iptables -D INPUT -i %i -m conntrack --ctstate NEW -j DROP
@@ -94,6 +96,7 @@ if ! $caddy_running && { port_used 80 t || port_used 443 t; }; then
   echo "Port 80/443 ist belegt – es läuft bereits ein Webserver. Dort eintragen:"
   echo "  $domain  →  http://$PHOTOS_UPSTREAM   (Beispiele: docs/reverse-proxy.md)"
   [[ -z "$cloud_domain" ]] || echo "  $cloud_domain  →  http://$CLOUD_UPSTREAM"
+  [[ -z "$docs_domain" ]] || echo "  $docs_domain  →  http://$DOCS_UPSTREAM"
 elif command -v docker >/dev/null 2>&1; then
   {
     echo "# Von setup.sh erzeugt – Änderungen werden beim nächsten Lauf überschrieben."
@@ -102,10 +105,11 @@ elif command -v docker >/dev/null 2>&1; then
     echo "# Caddy begrenzt die Upload-Größe standardmäßig nicht."
     printf '\n%s {\n\tencode zstd gzip\n\treverse_proxy %s\n}\n' "$domain" "$PHOTOS_UPSTREAM"
     [[ -z "$cloud_domain" ]] || printf '\n%s {\n\treverse_proxy %s\n}\n' "$cloud_domain" "$CLOUD_UPSTREAM"
+    [[ -z "$docs_domain" ]] || printf '\n%s {\n\treverse_proxy %s\n}\n' "$docs_domain" "$DOCS_UPSTREAM"
   } > Caddyfile
   docker compose up -d
   docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null 2>&1 || docker compose restart caddy
-  echo "Caddy läuft – https://$domain${cloud_domain:+ und https://$cloud_domain} sind erreichbar, sobald der Tunnel steht."
+  echo "Caddy läuft – https://$domain${cloud_domain:+, https://$cloud_domain}${docs_domain:+, https://$docs_domain} sind erreichbar, sobald der Tunnel steht."
 else
   echo "Port 80/443 ist frei, aber Docker fehlt. Entweder Docker installieren"
   echo "(curl -fsSL https://get.docker.com | sh) und dieses Skript erneut starten,"

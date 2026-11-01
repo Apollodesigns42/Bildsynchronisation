@@ -1,0 +1,101 @@
+# Dokumentenverwaltung mit Paperless-ngx (+ optional Scannen per Browser mit scanservjs).
+#
+# Basiert auf der offiziellen Konfiguration (PostgreSQL + Tika):
+#   https://github.com/paperless-ngx/paperless-ngx/tree/main/docker/compose
+# HTTPS übernimmt der VPS; hier läuft Paperless unverschlüsselt hinter dem WireGuard-Tunnel.
+# Konfiguration in .env.
+
+name: paperless
+
+services:
+  broker:
+    container_name: paperless_broker
+    image: docker.io/valkey/valkey:9-alpine
+    restart: always
+    volumes:
+      - redisdata:/data
+
+  db:
+    container_name: paperless_db
+    image: docker.io/library/postgres:18
+    restart: always
+    volumes:
+      - ${PAPERLESS_DB_DIR}:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: ${PAPERLESS_DB_PASSWORD}
+
+  webserver:
+    container_name: paperless
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    restart: always
+    depends_on:
+      - db
+      - broker
+    ports:
+      # Erreichbar für den VPS über den WireGuard-Tunnel. Die FritzBox gibt den Port NICHT frei.
+      - '8000:8000'
+    volumes:
+      # Suchindex und gelernte Zuordnungen → System-SSD
+      - ${PAPERLESS_DATA_DIR}:/usr/src/paperless/data
+      # Die Dokumente selbst → Daten-Platte
+      - ${PAPERLESS_MEDIA_DIR}:/usr/src/paperless/media
+      # Eingangsordner: Was hier landet, wird automatisch übernommen (auch von scanservjs)
+      - ${PAPERLESS_CONSUME_DIR}:/usr/src/paperless/consume
+      - ./export:/usr/src/paperless/export
+    environment:
+      PAPERLESS_URL: https://${PAPERLESS_DOMAIN}
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY}
+      # Wird beim ersten Start angelegt (Benutzer "admin")
+      PAPERLESS_ADMIN_USER: admin
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD}
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBENGINE: postgresql
+      PAPERLESS_DBPASS: ${PAPERLESS_DB_PASSWORD}
+      USERMAP_UID: '1000'
+      USERMAP_GID: '1000'
+      PAPERLESS_TIME_ZONE: Europe/Berlin
+      PAPERLESS_OCR_LANGUAGE: deu+eng
+      # Ablage auf der Platte nach Jahr/Absender/Titel – auch ohne Paperless verständlich
+      PAPERLESS_FILENAME_FORMAT: '{{ created_year }}/{{ correspondent }}/{{ title }}'
+      # Office-Dateien (Word, Excel, E-Mails als .eml) – nur mit COMPOSE_PROFILES=office
+      PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED:-0}
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+
+  # --- Optional: Office-Dateien (braucht ca. 1 GB RAM zusätzlich) ---
+  gotenberg:
+    profiles: [office]
+    container_name: paperless_gotenberg
+    image: docker.io/gotenberg/gotenberg:8.37
+    restart: always
+    # Kein JavaScript und keine externen Inhalte (Tracking-Pixel) beim Umwandeln von E-Mails
+    command:
+      - gotenberg
+      - --chromium-disable-javascript=true
+      - --chromium-allow-list=^file:///tmp/.*
+
+  tika:
+    profiles: [office]
+    container_name: paperless_tika
+    image: docker.io/apache/tika:3.3.1.0
+    restart: always
+
+  # --- Optional: Scannen per Browser (nur im Heimnetz, http://<Mini-PC>:8080) ---
+  # Spricht den Netzwerk-Scanner per eSCL/AirScan an und legt Scans direkt in den Eingangsordner.
+  scanservjs:
+    profiles: [scanner]
+    container_name: scanservjs
+    image: docker.io/sbs20/scanservjs:latest
+    restart: always
+    ports:
+      - '8080:8080'
+    environment:
+      AIRSCAN_DEVICES: '"${SCANNER_NAME:-Scanner}" = ${SCANNER_URL}'
+    volumes:
+      - ${PAPERLESS_CONSUME_DIR}:/var/lib/scanservjs/output
+
+volumes:
+  redisdata:

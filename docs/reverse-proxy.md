@@ -8,9 +8,10 @@ WireGuard-Tunnel an den Mini-PC weiter:
 |---|---|
 | Fotos (Immich) | `http://10.77.0.2:2283` |
 | Cloud (OpenCloud) | `http://10.77.0.2:9200` |
+| Dokumente (Paperless-ngx) | `http://10.77.0.2:8000` |
 
-Die Beispiele unten zeigen die Foto-Domain. Für die Cloud legst du einen zweiten, gleich aufgebauten Eintrag mit
-der Cloud-Domain und Port **9200** an.
+Die Beispiele unten zeigen die Foto-Domain. Für Cloud und Dokumente legst du je einen gleich aufgebauten Eintrag
+mit der jeweiligen Domain und Port **9200** bzw. **8000** an.
 
 Wichtig für alle Varianten:
 - **Keine Upload-Größenbegrenzung** (Videos können mehrere GB haben)

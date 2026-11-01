@@ -23,6 +23,7 @@ leitet über einen verschlüsselten Tunnel nach Hause weiter. Ein **verschlüsse
 | Ansicht auf Handy und PC | Responsive Weboberfläche im Browser + native Apps, daheim und unterwegs |
 | Extras | Suche per Beschreibung („Hund am Strand“), Alben teilen, Partner-Freigabe, Videos, RAW-Dateien |
 | Eigener Cloud-Speicher statt MEGA | OpenCloud: Ordner-Sync auf PC/Mac, Handy-Apps, Weboberfläche, Freigabe-Links mit Passwort |
+| Dokumentenverwaltung | Paperless-ngx: Texterkennung, Volltextsuche, automatische Einordnung, Scannen per Browser, E-Mail-Import |
 | Backup | Nächtlich, verschlüsselt und mit mehreren Versionen (restic) auf die Hetzner Storage Box |
 
 Die Daten liegen physisch bei dir zu Hause. Die KI-Auswertung läuft lokal, nichts geht an Dritte.
@@ -34,6 +35,7 @@ Die Daten liegen physisch bei dir zu Hause. Die KI-Auswertung läuft lokal, nich
 Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══►  Mini-PC
                         fotos.deine-domain.de ──────────────►    Immich    (Port 2283)
                         cloud.deine-domain.de ──────────────►    OpenCloud (Port 9200)
+                        dokumente.deine-domain.de ──────────►    Paperless (Port 8000)
                         nur Weiterleitung                               │
                                                                         │ nachts, verschlüsselt
                                                                         ▼
@@ -53,10 +55,11 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
 | `heimserver/docker-compose.yml` | Mini-PC | Offizielle Immich-Dienste |
 | `heimserver/install.sh` | Mini-PC | Ersteinrichtung Immich, erzeugt `.env` mit sicherem DB-Passwort |
 | `heimserver/cloud/` | Mini-PC | OpenCloud: `docker-compose.yml` + `install.sh` |
+| `heimserver/dokumente/` | Mini-PC | Paperless-ngx + Scannen per Browser: `docker-compose.yml` + `install.sh` |
 | `heimserver/tunnel.sh` | Mini-PC | Spielt die WireGuard-Konfiguration ein |
-| `heimserver/backup.sh` | Mini-PC | Nächtliches verschlüsseltes Backup (Fotos + Cloud) auf die Storage Box |
+| `heimserver/backup.sh` | Mini-PC | Nächtliches verschlüsseltes Backup (Fotos, Cloud, Dokumente) auf die Storage Box |
 | `heimserver/check.sh` | Mini-PC | Täglicher Gesundheits-Check mit E-Mail bei Problemen |
-| `heimserver/update.sh` | Mini-PC | Immich und OpenCloud aktualisieren |
+| `heimserver/update.sh` | Mini-PC | Immich, OpenCloud und Paperless aktualisieren |
 | `vps/setup.sh` | VPS | WireGuard-Tunnel + HTTPS-Weiterleitung (Caddy, falls Port 80/443 frei) |
 | `docs/reverse-proxy.md` | VPS | Weiterleitung, falls auf dem VPS schon ein Webserver läuft |
 | `scripts/import.sh` / `scripts/import.ps1` | dein PC | Import von Festplatte, Google-Takeout oder iCloud-Export |
@@ -67,7 +70,7 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
 
 | | Empfehlung |
 |---|---|
-| RAM | **8 GB** reichen für Immich + OpenCloud (zusammen ca. 4–6 GB), **16 GB** lassen Luft für weitere Dienste |
+| RAM | **8 GB** reichen für Immich + OpenCloud (zusammen ca. 4–6 GB). Mit Paperless wird es knapp, dann **16 GB** |
 | System-SSD | eingebaut, 256–512 GB reichen |
 | Daten-Platte | **1–2 TB**. Ideal ist ein Modell mit zweitem Steckplatz (2,5"-SATA oder M.2). Eine Festplatte (HDD) reicht völlig, das Internet ist ohnehin langsamer; Datenbank und Vorschaubilder liegen auf der System-SSD. Eine SSD ist nur leiser und sparsamer. Bei 150 GB Fotos + 40 GB Cloud reicht 1 TB einige Jahre. |
 | Preis | ca. 150–220 € + ca. 60–120 € für die SSD |
@@ -169,7 +172,44 @@ unter [opencloud.eu](https://opencloud.eu/de). Im PC-Programm wählst du Ordner 
 Freigabe-Links sind standardmäßig nur mit Passwort möglich. Die Foto-Sicherung der OpenCloud-App bleibt aus, darum
 kümmert sich Immich.
 
-### 6. Empfohlene Immich-Einstellungen nach dem ersten Login
+### 6. Dokumente (Paperless-ngx) einrichten (optional)
+
+[Paperless-ngx](https://docs.paperless-ngx.com) macht aus Scans, Fotos und PDFs ein durchsuchbares Archiv: Texterkennung
+(Deutsch und Englisch), Volltextsuche und automatische Zuordnung von Absender, Dokumenttyp und Schlagwörtern. Nach ein
+paar Beispielen lernt es selbst mit.
+
+**RAM:** Paperless braucht ca. 1–2 GB. Neben Immich und OpenCloud werden 8 GB damit knapp, 16 GB sind empfehlenswert.
+
+**Vorbereitung:**
+- DNS: A-Einträge der Dokumenten-Domain auf den VPS, im Caddyfile des VPS ein Eintrag mit Ziel `10.77.0.2:8000`
+  (oder `sudo vps/setup.sh` erneut ausführen und die Domain angeben)
+- Netzwerk-Scanner: In der FritzBox eine **feste IP** für den Drucker vergeben. Test im Browser:
+  `http://<IP des Druckers>/eSCL/ScannerCapabilities`. Erscheint eine XML-Seite, klappt das Scannen übers Netz.
+  Sonst `https://<IP>/eSCL/ScannerCapabilities` probieren und in `.env` die `SCANNER_URL` entsprechend anpassen.
+
+```bash
+cd bildsynchronisation/heimserver/dokumente
+./install.sh            # Domain, Speicherort (/mnt/daten/dokumente), IP des Scanners
+```
+
+Das Skript zeigt das **Admin-Passwort** einmal an, speichere es im Passwortmanager. Nach der Anmeldung als `admin`:
+1. **Zwei-Faktor-Anmeldung aktivieren** (Profil oben rechts). In Paperless landen Steuer, Verträge und Ausweise.
+2. Unter *Benutzer & Gruppen* einen persönlichen Benutzer für den Alltag anlegen.
+
+**Dokumente hineinbekommen:**
+
+| Weg | So geht's |
+|---|---|
+| **Scanner (Heimnetz)** | Dokument auflegen, im Browser `http://<IP des Mini-PCs>:8080` öffnen, „Scannen“. Für mehrere Seiten unter „Stapel“ den manuellen Modus wählen, dann fragt es nach jeder Seite. Der Scan landet direkt im Eingangsordner, Paperless übernimmt ihn innerhalb einer Minute. |
+| **E-Mail** | In deinem Postfach einen Ordner „Paperless“ anlegen. In Paperless unter *E-Mail* ein Konto hinzufügen (GMX: `imap.gmx.net`, Port 993, SSL) und eine Regel: Ordner „Paperless“, Anhänge verarbeiten, danach als gelesen markieren. Paperless schaut alle 10 Minuten nach. Rechnungen musst du dann nur noch in diesen Ordner verschieben. |
+| **Handy** | App „Paperless Mobile“ (Android) oder „Swift Paperless“ (iOS) mit `https://<Dokumenten-Domain>` anmelden und Dokumente abfotografieren. |
+| **Browser** | Dateien auf die Paperless-Startseite ziehen. |
+
+Word-, Excel- und E-Mail-Dateien (.eml) verarbeitet Paperless erst mit `COMPOSE_PROFILES=scanner,office` und
+`PAPERLESS_TIKA_ENABLED=1` in `.env` (danach `docker compose up -d`). Das kostet ca. 1 GB RAM mehr. PDF-Anhänge aus
+E-Mails gehen auch ohne.
+
+### 7. Empfohlene Immich-Einstellungen nach dem ersten Login
 
 Unter *Administration → Einstellungen*:
 

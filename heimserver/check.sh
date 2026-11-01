@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gesundheits-Check für den Heimserver. Schickt eine E-Mail, wenn etwas nicht stimmt.
 # Prüft: SSDs (SMART), letztes Backup, Speicherplatz, Docker-Container, WireGuard-Tunnel
-# und ob Fotos/Cloud aus dem Internet erreichbar sind. Als root ausführen.
+# und ob Fotos/Cloud/Dokumente aus dem Internet erreichbar sind. Als root ausführen.
 #
 # Verwendung:  sudo ./check.sh          # prüfen, bei Problemen Mail senden (täglich per cron)
 #              sudo ./check.sh test     # Test-Mail senden
@@ -97,6 +97,7 @@ env_path() { (cd "$(dirname "$1")" && set -a && source "$(basename "$1")" && rea
 paths=(/)
 [[ -f .env ]] && paths+=("$(env_path .env UPLOAD_LOCATION)")
 [[ -f cloud/.env ]] && paths+=("$(env_path cloud/.env OC_DATA_DIR)")
+[[ -f dokumente/.env ]] && paths+=("$(env_path dokumente/.env PAPERLESS_MEDIA_DIR)")
 declare -A seen=()
 for p in "${paths[@]}"; do
   [[ -n "$p" ]] || continue
@@ -113,6 +114,12 @@ done
 # --- 4. Docker-Container -----------------------------------------------------------
 containers=(immich_server immich_machine_learning immich_postgres immich_redis)
 [[ -f cloud/.env ]] && containers+=(opencloud)
+if [[ -f dokumente/.env ]]; then
+  containers+=(paperless paperless_db paperless_broker)
+  profiles=$(set -a; source dokumente/.env; echo "${COMPOSE_PROFILES:-}")
+  [[ $profiles == *scanner* ]] && containers+=(scanservjs)
+  [[ $profiles == *office* ]] && containers+=(paperless_tika paperless_gotenberg)
+fi
 before=${#problems[@]}
 for c in "${containers[@]}"; do
   state=$(docker inspect -f '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' "$c" 2>/dev/null) \
@@ -141,6 +148,7 @@ fi
 urls=()
 [[ -n "${PHOTOS_URL:-}" ]] && urls+=("${PHOTOS_URL%/}/api/server/ping")
 [[ -f cloud/.env ]] && urls+=("https://$(set -a; source cloud/.env; echo "$OC_DOMAIN")/")
+[[ -f dokumente/.env ]] && urls+=("https://$(set -a; source dokumente/.env; echo "$PAPERLESS_DOMAIN")/")
 for u in "${urls[@]}"; do
   code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "$u")
   if [[ $code =~ ^[23] ]]; then

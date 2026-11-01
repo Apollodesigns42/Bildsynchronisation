@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Verschlüsseltes, versioniertes Backup von Fotos (Immich) und Cloud (OpenCloud) mit restic,
+# Verschlüsseltes, versioniertes Backup von Fotos (Immich), Cloud (OpenCloud) und Dokumenten
+# (Paperless-ngx) mit restic,
 # standardmäßig auf die Hetzner Storage Box. Als root ausführen.
 #
 # Verwendung:  sudo ./backup.sh init     # einmalig: Passwort erzeugen, Repository anlegen
@@ -58,6 +59,16 @@ if [[ -f cloud/.env ]]; then
     trap 'docker start opencloud >/dev/null' EXIT
     docker stop opencloud >/dev/null
     restic backup "${limit[@]}" --tag opencloud "$(realpath "$OC_CONFIG_DIR")" "$(realpath "$OC_DATA_DIR")"
+  )
+fi
+
+# --- Dokumente (Paperless-ngx), falls eingerichtet ---
+if [[ -f dokumente/.env ]]; then
+  (
+    cd dokumente
+    set -a; source .env; set +a
+    docker exec paperless_db pg_dump -U paperless paperless | gzip > "$PAPERLESS_DATA_DIR/datenbank.sql.gz"
+    restic backup "${limit[@]}" --tag paperless "$(realpath "$PAPERLESS_DATA_DIR")" "$(realpath "$PAPERLESS_MEDIA_DIR")"
   )
 fi
 

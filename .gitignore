@@ -12,3 +12,8 @@ heimserver/cloud/daten/
 *.whl
 heimserver/check.env
 thumbs/
+heimserver/dokumente/db/
+heimserver/dokumente/data/
+heimserver/dokumente/eingang/
+heimserver/dokumente/dokumente/
+heimserver/dokumente/export/
