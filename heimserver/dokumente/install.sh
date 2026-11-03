@@ -22,7 +22,7 @@ if [[ ! -f .env ]]; then
   sed -e "s|^PAPERLESS_DOMAIN=.*|PAPERLESS_DOMAIN=${domain}|" \
       -e "s|^PAPERLESS_MEDIA_DIR=.*|PAPERLESS_MEDIA_DIR=${media}|" \
       -e "s|^COMPOSE_PROFILES=.*|COMPOSE_PROFILES=${profiles}|" \
-      -e "s|^SCANNER_URL=.*|SCANNER_URL=http://${scanner_ip:-192.168.178.50}/eSCL|" \
+      -e "s|^SCANNER_URL=.*|SCANNER_URL=http://${scanner_ip:-192.168.178.50}:80|" \
       -e "s|^PAPERLESS_SECRET_KEY=.*|PAPERLESS_SECRET_KEY=$(random 64)|" \
       -e "s|^PAPERLESS_DB_PASSWORD=.*|PAPERLESS_DB_PASSWORD=$(random 32)|" \
       -e "s|^PAPERLESS_ADMIN_PASSWORD=.*|PAPERLESS_ADMIN_PASSWORD=${admin_pw}|" \

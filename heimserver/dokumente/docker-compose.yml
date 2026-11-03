@@ -84,7 +84,8 @@ services:
     restart: always
 
   # --- Optional: Scannen per Browser (nur im Heimnetz, http://<Mini-PC>:8080) ---
-  # Spricht den Netzwerk-Scanner per eSCL/AirScan an und legt Scans direkt in den Eingangsordner.
+  # Spricht den Netzwerk-Scanner über den SANE-Treiber "escl" an und legt Scans direkt in den
+  # Eingangsordner. (Der AirScan-Treiber findet z.B. den HP Color Laser 178nwg nicht, escl schon.)
   scanservjs:
     profiles: [scanner]
     container_name: scanservjs
@@ -93,7 +94,9 @@ services:
     ports:
       - '8080:8080'
     environment:
-      AIRSCAN_DEVICES: '"${SCANNER_NAME:-Scanner}" = ${SCANNER_URL}'
+      DEVICES: escl:${SCANNER_URL}
+      # Keine automatische Suche – nur der eingetragene Scanner
+      SCANIMAGE_LIST_IGNORE: 'true'
     volumes:
       - ${PAPERLESS_CONSUME_DIR}:/var/lib/scanservjs/output
 

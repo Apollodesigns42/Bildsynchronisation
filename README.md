@@ -185,7 +185,8 @@ paar Beispielen lernt es selbst mit.
   (oder `sudo vps/setup.sh` erneut ausführen und die Domain angeben)
 - Netzwerk-Scanner: In der FritzBox eine **feste IP** für den Drucker vergeben. Test im Browser:
   `http://<IP des Druckers>/eSCL/ScannerCapabilities`. Erscheint eine XML-Seite, klappt das Scannen übers Netz.
-  Sonst `https://<IP>/eSCL/ScannerCapabilities` probieren und in `.env` die `SCANNER_URL` entsprechend anpassen.
+  Nach der Installation prüft `docker exec scanservjs scanimage -d escl:http://<IP>:80 -A`, ob der Scan-Dienst den
+  Drucker erreicht (es erscheint eine Liste mit `--mode`, `--resolution` …).
 
 ```bash
 cd bildsynchronisation/heimserver/dokumente
