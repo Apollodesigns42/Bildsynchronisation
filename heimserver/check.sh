@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gesundheits-Check für den Heimserver. Schickt eine E-Mail, wenn etwas nicht stimmt.
 # Prüft: SSDs (SMART), letztes Backup, Speicherplatz, Docker-Container, WireGuard-Tunnel
-# und ob Fotos/Cloud/Dokumente aus dem Internet erreichbar sind. Als root ausführen.
+# und ob Fotos/Cloud/Dokumente/Rezepte aus dem Internet erreichbar sind. Als root ausführen.
 #
 # Verwendung:  sudo ./check.sh          # prüfen, bei Problemen Mail senden (täglich per cron)
 #              sudo ./check.sh test     # Test-Mail senden
@@ -120,6 +120,7 @@ if [[ -f dokumente/.env ]]; then
   [[ $profiles == *scanner* ]] && containers+=(scanservjs)
   [[ $profiles == *office* ]] && containers+=(paperless_tika paperless_gotenberg)
 fi
+[[ -f rezepte/.env ]] && containers+=(mealie)
 before=${#problems[@]}
 for c in "${containers[@]}"; do
   state=$(docker inspect -f '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' "$c" 2>/dev/null) \
@@ -149,6 +150,7 @@ urls=()
 [[ -n "${PHOTOS_URL:-}" ]] && urls+=("${PHOTOS_URL%/}/api/server/ping")
 [[ -f cloud/.env ]] && urls+=("https://$(set -a; source cloud/.env; echo "$OC_DOMAIN")/")
 [[ -f dokumente/.env ]] && urls+=("https://$(set -a; source dokumente/.env; echo "$PAPERLESS_DOMAIN")/")
+[[ -f rezepte/.env ]] && urls+=("https://$(set -a; source rezepte/.env; echo "$MEALIE_DOMAIN")/")
 for u in "${urls[@]}"; do
   code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "$u")
   if [[ $code =~ ^[23] ]]; then

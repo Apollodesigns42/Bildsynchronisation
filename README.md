@@ -24,6 +24,7 @@ leitet über einen verschlüsselten Tunnel nach Hause weiter. Ein **verschlüsse
 | Extras | Suche per Beschreibung („Hund am Strand“), Alben teilen, Partner-Freigabe, Videos, RAW-Dateien |
 | Eigener Cloud-Speicher statt MEGA | OpenCloud: Ordner-Sync auf PC/Mac, Handy-Apps, Weboberfläche, Freigabe-Links mit Passwort |
 | Dokumentenverwaltung | Paperless-ngx: Texterkennung, Volltextsuche, automatische Einordnung, Scannen per Browser, E-Mail-Import |
+| Rezepte & Einkaufsliste | Mealie: Rezepte per Link importieren, Wochenplan, gemeinsame Einkaufsliste |
 | Backup | Nächtlich, verschlüsselt und mit mehreren Versionen (restic) auf die Hetzner Storage Box |
 
 Die Daten liegen physisch bei dir zu Hause. Die KI-Auswertung läuft lokal, nichts geht an Dritte.
@@ -36,6 +37,7 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
                         fotos.deine-domain.de ──────────────►    Immich    (Port 2283)
                         cloud.deine-domain.de ──────────────►    OpenCloud (Port 9200)
                         dokumente.deine-domain.de ──────────►    Paperless (Port 8000)
+                        rezepte.deine-domain.de ────────────►    Mealie    (Port 9925)
                         nur Weiterleitung                               │
                                                                         │ nachts, verschlüsselt
                                                                         ▼
@@ -56,6 +58,7 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
 | `heimserver/install.sh` | Mini-PC | Ersteinrichtung Immich, erzeugt `.env` mit sicherem DB-Passwort |
 | `heimserver/cloud/` | Mini-PC | OpenCloud: `docker-compose.yml` + `install.sh` |
 | `heimserver/dokumente/` | Mini-PC | Paperless-ngx + Scannen per Browser: `docker-compose.yml` + `install.sh` |
+| `heimserver/rezepte/` | Mini-PC | Mealie (Rezepte, Wochenplan, Einkaufsliste): `docker-compose.yml` + `install.sh` |
 | `heimserver/tunnel.sh` | Mini-PC | Spielt die WireGuard-Konfiguration ein |
 | `heimserver/backup.sh` | Mini-PC | Nächtliches verschlüsseltes Backup (Fotos, Cloud, Dokumente) auf die Storage Box |
 | `heimserver/check.sh` | Mini-PC | Täglicher Gesundheits-Check mit E-Mail bei Problemen |
@@ -210,7 +213,28 @@ Word-, Excel- und E-Mail-Dateien (.eml) verarbeitet Paperless erst mit `COMPOSE_
 `PAPERLESS_TIKA_ENABLED=1` in `.env` (danach `docker compose up -d`). Das kostet ca. 1 GB RAM mehr. PDF-Anhänge aus
 E-Mails gehen auch ohne.
 
-### 7. Empfohlene Immich-Einstellungen nach dem ersten Login
+### 7. Rezepte & Einkaufsliste (Mealie) einrichten (optional)
+
+[Mealie](https://mealie.io) sammelt Rezepte (Import per Link von fast jeder Rezeptseite), plant die Woche und
+erzeugt daraus eine gemeinsame Einkaufsliste. Die Einkaufsliste lässt sich auch ganz ohne Rezepte nutzen.
+
+```bash
+cd bildsynchronisation/heimserver/rezepte
+./install.sh            # Domain, z.B. rezepte.deine-domain.de
+```
+
+⚠️ **Mealie startet mit einem Standard-Zugang** (`changeme@example.com` / `MyPassword`). Deshalb in dieser Reihenfolge:
+1. Im Heimnetz `http://<IP des Mini-PCs>:9925` öffnen, mit dem Standard-Zugang anmelden.
+2. Unter *Profil* **E-Mail-Adresse und Passwort ändern**, Sprache auf Deutsch stellen.
+3. **Erst dann** die Domain freischalten: DNS-Eintrag auf den VPS und im Caddyfile `reverse_proxy 10.77.0.2:9925`
+   (oder `sudo vps/setup.sh` erneut ausführen).
+4. Weitere Familienmitglieder unter *Einstellungen → Benutzer* einladen oder anlegen.
+
+Auf dem Handy die Seite im Browser öffnen und **„Zum Startbildschirm hinzufügen“** wählen, dann verhält sie sich
+wie eine App. Mealie hat eine feste Version (`MEALIE_VERSION` in `rezepte/.env`), `update.sh` aktualisiert es erst,
+wenn du die Version dort erhöhst.
+
+### 8. Empfohlene Immich-Einstellungen nach dem ersten Login
 
 Unter *Administration → Einstellungen*:
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Verschlüsseltes, versioniertes Backup von Fotos (Immich), Cloud (OpenCloud) und Dokumenten
-# (Paperless-ngx) mit restic,
+# Verschlüsseltes, versioniertes Backup von Fotos (Immich), Cloud (OpenCloud), Dokumenten
+# (Paperless-ngx) und Rezepten (Mealie) mit restic,
 # standardmäßig auf die Hetzner Storage Box. Als root ausführen.
 #
 # Verwendung:  sudo ./backup.sh init     # einmalig: Passwort erzeugen, Repository anlegen
@@ -69,6 +69,18 @@ if [[ -f dokumente/.env ]]; then
     set -a; source .env; set +a
     docker exec paperless_db pg_dump -U paperless paperless | gzip > "$PAPERLESS_DATA_DIR/datenbank.sql.gz"
     restic backup "${limit[@]}" --tag paperless "$(realpath "$PAPERLESS_DATA_DIR")" "$(realpath "$PAPERLESS_MEDIA_DIR")"
+  )
+fi
+
+# --- Rezepte (Mealie), falls eingerichtet ---
+if [[ -f rezepte/.env ]]; then
+  (
+    cd rezepte
+    set -a; source .env; set +a
+    # SQLite-Datenbank: für ein stimmiges Backup Mealie kurz anhalten (wenige Sekunden)
+    trap 'docker start mealie >/dev/null' EXIT
+    docker stop mealie >/dev/null
+    restic backup "${limit[@]}" --tag mealie "$(realpath "$MEALIE_DATA_DIR")"
   )
 fi
 
