@@ -25,6 +25,8 @@ leitet über einen verschlüsselten Tunnel nach Hause weiter. Ein **verschlüsse
 | Eigener Cloud-Speicher statt MEGA | OpenCloud: Ordner-Sync auf PC/Mac, Handy-Apps, Weboberfläche, Freigabe-Links mit Passwort |
 | Dokumentenverwaltung | Paperless-ngx: Texterkennung, Volltextsuche, automatische Einordnung, Scannen per Browser, E-Mail-Import |
 | Rezepte & Einkaufsliste | Mealie: Rezepte per Link importieren, Wochenplan, gemeinsame Einkaufsliste |
+| Werbeblocker fürs Heimnetz | AdGuard Home: filtert Werbung und Tracking für alle Geräte zu Hause |
+| Überwachung von außen | Uptime Kuma auf dem VPS: Push-Nachricht aufs Handy, wenn ein Dienst ausfällt |
 | Backup | Nächtlich, verschlüsselt und mit mehreren Versionen (restic) auf die Hetzner Storage Box |
 
 Die Daten liegen physisch bei dir zu Hause. Die KI-Auswertung läuft lokal, nichts geht an Dritte.
@@ -59,6 +61,8 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
 | `heimserver/cloud/` | Mini-PC | OpenCloud: `docker-compose.yml` + `install.sh` |
 | `heimserver/dokumente/` | Mini-PC | Paperless-ngx + Scannen per Browser: `docker-compose.yml` + `install.sh` |
 | `heimserver/rezepte/` | Mini-PC | Mealie (Rezepte, Wochenplan, Einkaufsliste): `docker-compose.yml` + `install.sh` |
+| `heimserver/adguard/` | Mini-PC | AdGuard Home (nur Heimnetz): `docker-compose.yml` + `install.sh` |
+| `vps/uptime-kuma/` | VPS | Uptime Kuma: überwacht alle Dienste von außen |
 | `heimserver/tunnel.sh` | Mini-PC | Spielt die WireGuard-Konfiguration ein |
 | `heimserver/backup.sh` | Mini-PC | Nächtliches verschlüsseltes Backup (Fotos, Cloud, Dokumente) auf die Storage Box |
 | `heimserver/check.sh` | Mini-PC | Täglicher Gesundheits-Check mit E-Mail bei Problemen |
@@ -234,7 +238,88 @@ Auf dem Handy die Seite im Browser öffnen und **„Zum Startbildschirm hinzufü
 wie eine App. Mealie hat eine feste Version (`MEALIE_VERSION` in `rezepte/.env`), `update.sh` aktualisiert es erst,
 wenn du die Version dort erhöhst.
 
-### 8. Empfohlene Immich-Einstellungen nach dem ersten Login
+### 8. Werbeblocker fürs Heimnetz (AdGuard Home) einrichten (optional)
+
+AdGuard Home beantwortet die DNS-Anfragen aller Geräte im Heimnetz und blockiert dabei Werbe- und Tracking-Adressen –
+auch auf Fernseher, Echo & Co., wo man sonst keinen Werbeblocker installieren kann. Es ist **nur im Heimnetz**
+erreichbar.
+
+```bash
+cd bildsynchronisation/heimserver/adguard
+./install.sh            # bestätigt die LAN-Adresse des Mini-PCs
+```
+
+1. **Einrichtungsassistent** `http://<IP des Mini-PCs>:3000` öffnen:
+   - Admin-Weboberfläche: *Alle Schnittstellen*, **Port 80** lassen
+   - DNS-Server: *Alle Schnittstellen*, **Port 53** lassen
+   - Benutzername und Passwort festlegen (Passwortmanager)
+   (Die Ports gelten innerhalb des Containers; von außen ist die Oberfläche danach unter **Port 3080** erreichbar.)
+2. **Weboberfläche** `http://<IP des Mini-PCs>:3080` → *Einstellungen → DNS-Einstellungen*:
+   - Upstream-DNS-Server: `https://dns.quad9.net/dns-query` (Quad9, Schweiz, datenschutzfreundlich)
+   - Bootstrap-DNS: `9.9.9.9`
+3. **Filter** (*Filter → DNS-Sperrlisten*): Die voreingestellte „AdGuard DNS filter“-Liste reicht für den Anfang.
+   Über „Sperrliste hinzufügen → Aus der Liste wählen“ lassen sich weitere ergänzen (z.B. „OISD Blocklist Small“).
+4. **FritzBox** → *Internet → Zugangsdaten → DNS-Server* → **„Andere DNSv4-Server verwenden“**:
+   - Bevorzugter DNSv4-Server: **IP des Mini-PCs** (z.B. `192.168.178.23`)
+   - Alternativer DNSv4-Server: **`9.9.9.9`**
+
+   Die FritzBox fragt dann zuerst AdGuard. Ist der Mini-PC aus, nimmt sie Quad9 – das Internet funktioniert weiter,
+   nur eben ohne Werbefilter.
+
+**Test:** Am PC `nslookup doubleclick.net` eingeben – die Antwort sollte `0.0.0.0` sein. Im AdGuard-Abfrageprotokoll
+tauchen die Anfragen auf (alle mit der Adresse der FritzBox, weil sie weiterleitet).
+
+**Wenn eine Seite oder App plötzlich nicht mehr funktioniert:** Im Abfrageprotokoll nach der gesperrten Adresse suchen
+und auf **„Freigeben“** klicken.
+
+## Überwachung von außen (Uptime Kuma auf dem VPS)
+
+Der tägliche Check auf dem Mini-PC meldet Probleme per Mail – fällt der Mini-PC aber ganz aus (Strom, Internet,
+Defekt), kann er nichts mehr melden. Uptime Kuma prüft deshalb **vom VPS aus** jede Minute, ob alle Dienste erreichbar
+sind, und schickt bei einem Ausfall sofort eine **Push-Nachricht** aufs Handy (über die kostenlose App **ntfy**).
+
+**1. Installieren** (auf dem VPS):
+
+```bash
+docker --version || curl -fsSL https://get.docker.com | sh
+cd <Repo-Ordner auf dem VPS>/vps/uptime-kuma && git pull
+docker compose up -d
+```
+
+**2. Einrichten** – die Weboberfläche ist absichtlich nur auf dem VPS selbst erreichbar. Vom PC aus per SSH-Tunnel:
+
+```bash
+ssh -L 3001:127.0.0.1:3001 root@<IP des VPS>
+```
+
+Solange diese Verbindung offen ist, im Browser **`http://localhost:3001`** öffnen → Admin-Konto anlegen → Einstellungen →
+Sprache **Deutsch**. (Die Oberfläche bleibt so dauerhaft privat; zum Nachsehen einfach wieder den SSH-Tunnel öffnen.
+Die Push-Nachrichten kommen natürlich auch ohne Tunnel.)
+
+**3. Push-Nachrichten (ntfy):**
+1. App **„ntfy“** installieren (Android/iOS), **„+“** → Thema abonnieren, Server `ntfy.sh`, als Thema einen
+   **langen, zufälligen Namen** wählen, z.B. `heimserver-k7Qx2mPz9w` (wer den Namen kennt, kann mitlesen).
+2. In Uptime Kuma: *Einstellungen → Benachrichtigungen → Benachrichtigung einrichten* → Typ **ntfy**,
+   Server `https://ntfy.sh`, dasselbe Thema, **„Standardmäßig aktiviert“** und **„Auf alle bestehenden Monitore
+   anwenden“** anhaken → **Testen**.
+
+**4. Monitore anlegen** (*Neuen Monitor hinzufügen*, Intervall 60 s, Wiederholungen 3):
+
+| Name | Typ | Adresse | |
+|---|---|---|---|
+| Fotos | HTTP(s) – Schlüsselwort | `https://fotos.deine-domain.de/api/server/ping` | Schlüsselwort `pong` |
+| Cloud | HTTP(s) | `https://cloud.deine-domain.de` | |
+| Dokumente | HTTP(s) | `https://dokumente.deine-domain.de` | |
+| Rezepte | HTTP(s) | `https://rezepte.deine-domain.de` | |
+| Tunnel zum Mini-PC | TCP-Port | Host `10.77.0.2`, Port `2283` | zeigt, ob der Tunnel steht |
+
+Bei den HTTP(s)-Monitoren unter „Erweitert“ zusätzlich **„Zertifikatsablauf-Benachrichtigung“** aktivieren. Andere
+Webseiten auf dem VPS lassen sich genauso mit überwachen.
+
+So liest man eine Meldung: Fallen **alle** Heimdienste und der Tunnel gleichzeitig aus, ist der Mini-PC oder das
+Internet daheim weg. Fällt nur **einer** aus, hängt dieser eine Dienst (`docker compose ps` auf dem Mini-PC).
+
+### 9. Empfohlene Immich-Einstellungen nach dem ersten Login
 
 Unter *Administration → Einstellungen*:
 

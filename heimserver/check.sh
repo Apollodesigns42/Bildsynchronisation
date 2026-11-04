@@ -121,6 +121,7 @@ if [[ -f dokumente/.env ]]; then
   [[ $profiles == *office* ]] && containers+=(paperless_tika paperless_gotenberg)
 fi
 [[ -f rezepte/.env ]] && containers+=(mealie)
+[[ -f adguard/.env ]] && containers+=(adguard)
 before=${#problems[@]}
 for c in "${containers[@]}"; do
   state=$(docker inspect -f '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' "$c" 2>/dev/null) \

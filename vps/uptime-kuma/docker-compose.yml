@@ -1,0 +1,19 @@
+# Überwachung von außen mit Uptime Kuma – läuft auf dem VPS, nicht auf dem Mini-PC.
+# Prüft regelmäßig, ob Fotos, Cloud, Dokumente, Rezepte (und Burgenkampf) erreichbar sind,
+# und schickt bei Ausfällen eine Push-Nachricht (ntfy). So fällt auch auf, wenn der
+# Mini-PC daheim komplett ausfällt und selbst keine Mail mehr schicken kann.
+#
+# Die Weboberfläche lauscht nur lokal (127.0.0.1:3001). Von außen erreichbar wird sie erst
+# über einen Eintrag im Caddyfile des VPS – und zwar erst NACH der Ersteinrichtung (README).
+
+name: uptime-kuma
+
+services:
+  uptime-kuma:
+    container_name: uptime-kuma
+    image: docker.io/louislam/uptime-kuma:2
+    restart: always
+    ports:
+      - '127.0.0.1:3001:3001'
+    volumes:
+      - ./data:/app/data

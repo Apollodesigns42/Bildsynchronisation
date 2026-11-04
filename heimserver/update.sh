@@ -7,7 +7,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 docker compose pull
 docker compose up -d
-for dir in cloud dokumente rezepte; do
+for dir in cloud dokumente rezepte adguard; do
   if [[ -f $dir/.env ]]; then
     (cd "$dir" && docker compose pull && docker compose up -d)
   fi

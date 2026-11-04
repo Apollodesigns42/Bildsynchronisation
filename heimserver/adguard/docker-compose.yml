@@ -1,0 +1,23 @@
+# Werbe- und Tracking-Blocker für das ganze Heimnetz mit AdGuard Home.
+#
+# Läuft nur im Heimnetz: Alle Ports sind an die LAN-Adresse des Mini-PCs gebunden
+# (ADGUARD_IP in .env) – weder aus dem Internet noch über den WireGuard-Tunnel erreichbar.
+# Die FritzBox leitet ihre DNS-Anfragen hierher (siehe README).
+
+name: adguard
+
+services:
+  adguard:
+    container_name: adguard
+    image: docker.io/adguard/adguardhome:latest
+    restart: always
+    ports:
+      - '${ADGUARD_IP}:53:53/tcp'
+      - '${ADGUARD_IP}:53:53/udp'
+      # Einrichtungsassistent (nur beim ersten Start nötig)
+      - '${ADGUARD_IP}:3000:3000/tcp'
+      # Weboberfläche nach der Einrichtung
+      - '${ADGUARD_IP}:3080:80/tcp'
+    volumes:
+      - ./conf:/opt/adguardhome/conf
+      - ./work:/opt/adguardhome/work

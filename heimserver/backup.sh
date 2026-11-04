@@ -84,6 +84,11 @@ if [[ -f rezepte/.env ]]; then
   )
 fi
 
+# --- Werbeblocker (AdGuard Home), falls eingerichtet – nur die Einstellungen ---
+if [[ -f adguard/.env ]]; then
+  restic backup "${limit[@]}" --tag adguard "$(realpath adguard/conf)"
+fi
+
 # --- Alte Stände aufräumen (sonntags, das Aufräumen dauert etwas) ---
 if [[ $(date +%u) == 7 ]]; then
   restic forget --prune --group-by tags \
