@@ -266,17 +266,25 @@ cd bildsynchronisation/heimserver/adguard
    - Bootstrap-DNS: `9.9.9.9`
 3. **Filter** (*Filter → DNS-Sperrlisten*): Die voreingestellte „AdGuard DNS filter“-Liste reicht für den Anfang.
    Über „Sperrliste hinzufügen → Aus der Liste wählen“ lassen sich weitere ergänzen (z.B. „OISD Blocklist Small“).
-4. **FritzBox** → *Internet → Zugangsdaten → DNS-Server* → **„Andere DNSv4-Server verwenden“**:
-   - Bevorzugter DNSv4-Server: **IP des Mini-PCs** (z.B. `192.168.178.23`)
-   - Alternativer DNSv4-Server: **`9.9.9.9`**
+4. **FritzBox** → *Internet → Zugangsdaten → DNS-Server* – **bei bevorzugt UND alternativ jeweils AdGuard** eintragen:
 
-   - **„Andere DNSv6-Server verwenden“** – sonst fragt die FritzBox über IPv6 am Filter vorbei:
-     Bevorzugter DNSv6-Server: die **IPv6-Adresse des Mini-PCs**, die `install.sh` anzeigt (beginnt mit `fd`,
-     steht auch als `ADGUARD_IP6` in `adguard/.env`), alternativer DNSv6-Server: **`2620:fe::fe`** (Quad9)
-   - Haken bei **„Verschlüsselte Namensauflösung im Internet (DNS over TLS)“** entfernen, falls gesetzt
+   | | Bevorzugt | Alternativ |
+   |---|---|---|
+   | „Andere DNSv4-Server verwenden“ | IP des Mini-PCs (z.B. `192.168.178.23`) | dieselbe |
+   | „Andere DNSv6-Server verwenden“ | IPv6-Adresse des Mini-PCs (`fd…`, zeigt `install.sh`) | dieselbe |
 
-   Die FritzBox fragt dann zuerst AdGuard. Ist der Mini-PC aus, nimmt sie Quad9 – das Internet funktioniert weiter,
-   nur eben ohne Werbefilter.
+   Haken bei **„Verschlüsselte Namensauflösung im Internet (DNS over TLS)“** entfernen. Nach „Übernehmen“ ggf. an der
+   FritzBox per Tastendruck bestätigen, sonst verwirft sie die Änderung. Im **Online-Monitor** muss bei „Genutzte
+   DNS-Server“ eine AdGuard-Adresse als „aktuell genutzt“ stehen.
+
+   ⚠️ **Keinen öffentlichen Server (z.B. Quad9) als Alternative eintragen:** Die FritzBox wechselt sonst beim kleinsten
+   Aussetzer dorthin und bleibt dabei – der Filter ist dann unbemerkt aus. Der Preis: Ist der Mini-PC aus, können die
+   Geräte daheim keine Adressen auflösen. Notfall: in der FritzBox auf „Die vom Internetanbieter zugewiesenen
+   DNS-Server verwenden“ zurückstellen (IPv4 und IPv6). Uptime Kuma meldet einen Ausfall des Mini-PCs per Push.
+
+   Nach Änderungen an den DNS-Einstellungen kann die FritzBox kurz ihre eigene Adresse ausgeben. Meldet eine App danach
+   einen Zertifikatsfehler mit der FritzBox als Aussteller: **nicht bestätigen**, sondern `ipconfig /flushdns` und die App
+   neu starten.
 
 **Test:** Am PC `ipconfig /flushdns` und dann `nslookup googleads.g.doubleclick.net` – die Antwort sollte `0.0.0.0` bzw. `::` sein. Im AdGuard-Abfrageprotokoll
 tauchen die Anfragen auf (alle mit der Adresse der FritzBox, weil sie weiterleitet).
