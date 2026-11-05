@@ -266,21 +266,21 @@ cd bildsynchronisation/heimserver/adguard
    - Bootstrap-DNS: `9.9.9.9`
 3. **Filter** (*Filter → DNS-Sperrlisten*): Die voreingestellte „AdGuard DNS filter“-Liste reicht für den Anfang.
    Über „Sperrliste hinzufügen → Aus der Liste wählen“ lassen sich weitere ergänzen (z.B. „OISD Blocklist Small“).
-4. **FritzBox** → *Internet → Zugangsdaten → DNS-Server* – **bei bevorzugt UND alternativ jeweils AdGuard** eintragen:
+4. **FritzBox** → *Internet → Zugangsdaten → DNS-Server*:
 
-   | | Bevorzugt | Alternativ |
+   | | Bevorzugt | Alternativ (Rückfall) |
    |---|---|---|
-   | „Andere DNSv4-Server verwenden“ | IP des Mini-PCs (z.B. `192.168.178.23`) | dieselbe |
-   | „Andere DNSv6-Server verwenden“ | IPv6-Adresse des Mini-PCs (`fd…`, zeigt `install.sh`) | dieselbe |
+   | „Andere DNSv4-Server verwenden“ | IP des Mini-PCs (z.B. `192.168.178.23`) | `9.9.9.9` |
+   | „Andere DNSv6-Server verwenden“ | IPv6-Adresse des Mini-PCs (`fd…`, zeigt `install.sh`) | `2620:fe::fe` |
 
    Haken bei **„Verschlüsselte Namensauflösung im Internet (DNS over TLS)“** entfernen. Nach „Übernehmen“ ggf. an der
    FritzBox per Tastendruck bestätigen, sonst verwirft sie die Änderung. Im **Online-Monitor** muss bei „Genutzte
    DNS-Server“ eine AdGuard-Adresse als „aktuell genutzt“ stehen.
 
-   ⚠️ **Keinen öffentlichen Server (z.B. Quad9) als Alternative eintragen:** Die FritzBox wechselt sonst beim kleinsten
-   Aussetzer dorthin und bleibt dabei – der Filter ist dann unbemerkt aus. Der Preis: Ist der Mini-PC aus, können die
-   Geräte daheim keine Adressen auflösen. Notfall: in der FritzBox auf „Die vom Internetanbieter zugewiesenen
-   DNS-Server verwenden“ zurückstellen (IPv4 und IPv6). Uptime Kuma meldet einen Ausfall des Mini-PCs per Push.
+   **Wichtig zum Rückfall:** Ist AdGuard kurz nicht erreichbar (Neustart, Update), wechselt die FritzBox auf Quad9 –
+   das Internet funktioniert weiter – **bleibt dort aber auch**, der Filter ist dann aus. Der **tägliche Check**
+   (`check.sh`) testet deshalb, ob eine bekannte Werbeadresse blockiert wird, und meldet per Mail
+   „Werbefilter ist aus“. Abhilfe: **FritzBox neu starten**, danach nutzt sie wieder AdGuard.
 
    Nach Änderungen an den DNS-Einstellungen kann die FritzBox kurz ihre eigene Adresse ausgeben. Meldet eine App danach
    einen Zertifikatsfehler mit der FritzBox als Aussteller: **nicht bestätigen**, sondern `ipconfig /flushdns` und die App

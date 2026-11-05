@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gesundheits-Check für den Heimserver. Schickt eine E-Mail, wenn etwas nicht stimmt.
-# Prüft: SSDs (SMART), letztes Backup, Speicherplatz, Docker-Container, WireGuard-Tunnel
-# und ob Fotos/Cloud/Dokumente/Rezepte aus dem Internet erreichbar sind. Als root ausführen.
+# Prüft: SSDs (SMART), letztes Backup, Speicherplatz, Docker-Container, WireGuard-Tunnel,
+# Werbefilter (FritzBox → AdGuard) und ob die Dienste aus dem Internet erreichbar sind. Als root ausführen.
 #
 # Verwendung:  sudo ./check.sh          # prüfen, bei Problemen Mail senden (täglich per cron)
 #              sudo ./check.sh test     # Test-Mail senden
@@ -146,6 +146,23 @@ if [[ -f /etc/wireguard/wg-fotos.conf ]]; then
     problem "WireGuard-Tunnel: kein Kontakt zum VPS seit $(( ($(date +%s) - hs) / 60 )) Minuten."
   else
     info "Tunnel zum VPS: ok"
+  fi
+fi
+
+# --- 5b. Werbefilter: leitet die FritzBox wirklich an AdGuard weiter? -------------
+# Die FritzBox wechselt bei kurzen Aussetzern von AdGuard auf den alternativen DNS-Server
+# (z.B. Quad9) und bleibt dort – dann ist der Filter unbemerkt aus. Test: Eine bekannte
+# Werbeadresse muss über den normalen Weg (Mini-PC → FritzBox → AdGuard) auf 0.0.0.0 führen.
+if [[ -f adguard/.env ]]; then
+  test_domain=${ADGUARD_TEST_DOMAIN:-googleads.g.doubleclick.net}
+  resolvectl flush-caches >/dev/null 2>&1 || true
+  answer=$(getent ahostsv4 "$test_domain" 2>/dev/null | awk 'NR == 1 {print $1}')
+  if [[ -z "$answer" ]]; then
+    problem "Werbefilter: $test_domain lässt sich gar nicht auflösen – DNS im Heimnetz gestört?"
+  elif [[ "$answer" != "0.0.0.0" ]]; then
+    problem "Werbefilter ist aus: Die FritzBox nutzt nicht AdGuard (vermutlich auf dem alternativen DNS-Server hängen geblieben). Abhilfe: FritzBox neu starten; danach im Online-Monitor prüfen, dass ein AdGuard-Server „aktuell genutzt“ wird."
+  else
+    info "Werbefilter: aktiv (FritzBox leitet an AdGuard weiter)"
   fi
 fi
 
