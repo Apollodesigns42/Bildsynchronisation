@@ -75,6 +75,7 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
 | `heimserver/update.sh` | Mini-PC | Immich, OpenCloud und Paperless aktualisieren |
 | `vps/setup.sh` | VPS | WireGuard-Tunnel + HTTPS-Weiterleitung (Caddy, falls Port 80/443 frei) |
 | `docs/reverse-proxy.md` | VPS | Weiterleitung, falls auf dem VPS schon ein Webserver läuft |
+| `docs/fahrplan.md` | – | Reihenfolge der noch offenen Schritte und Übersicht der Domains |
 | `scripts/import.sh` / `scripts/import.ps1` | dein PC | Import von Festplatte, Google-Takeout oder iCloud-Export |
 
 ## Einkaufsliste
