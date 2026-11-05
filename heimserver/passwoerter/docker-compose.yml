@@ -1,0 +1,30 @@
+# Passwortmanager mit Vaultwarden (kompatibel mit den Bitwarden-Apps).
+#
+# HTTPS übernimmt der VPS; hier läuft Vaultwarden unverschlüsselt hinter dem WireGuard-Tunnel.
+# Die Bitwarden-Apps funktionieren nur über HTTPS – also immer die Domain verwenden.
+# Konfiguration in .env.
+
+name: vaultwarden
+
+services:
+  vaultwarden:
+    container_name: vaultwarden
+    image: docker.io/vaultwarden/server:latest
+    restart: always
+    ports:
+      # Im Heimnetz und über den WireGuard-Tunnel erreichbar. Die FritzBox gibt den Port NICHT frei.
+      - '8222:80'
+    volumes:
+      - ${VAULTWARDEN_DATA_DIR:-./data}:/data
+    environment:
+      DOMAIN: https://${VAULTWARDEN_DOMAIN}
+      # Nur zum Anlegen eurer Konten auf true – danach false (siehe README)
+      SIGNUPS_ALLOWED: ${VAULTWARDEN_SIGNUPS_ALLOWED:-false}
+      # Einladungen per Mail gibt es ohne Mailserver nicht
+      INVITATIONS_ALLOWED: 'false'
+      # Keine Passwort-Hinweise anzeigen
+      SHOW_PASSWORD_HINT: 'false'
+      # Echte Absender-Adresse kommt vom Caddy auf dem VPS
+      IP_HEADER: X-Forwarded-For
+      # Admin-Oberfläche bleibt aus (kein ADMIN_TOKEN gesetzt)
+      TZ: Europe/Berlin

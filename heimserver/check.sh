@@ -122,6 +122,9 @@ if [[ -f dokumente/.env ]]; then
 fi
 [[ -f rezepte/.env ]] && containers+=(mealie)
 [[ -f adguard/.env ]] && containers+=(adguard)
+[[ -f passwoerter/.env ]] && containers+=(vaultwarden)
+[[ -f smarthome/.env ]] && containers+=(homeassistant)
+[[ -f startseite/.env ]] && containers+=(homepage)
 before=${#problems[@]}
 for c in "${containers[@]}"; do
   state=$(docker inspect -f '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' "$c" 2>/dev/null) \
@@ -152,6 +155,9 @@ urls=()
 [[ -f cloud/.env ]] && urls+=("https://$(set -a; source cloud/.env; echo "$OC_DOMAIN")/")
 [[ -f dokumente/.env ]] && urls+=("https://$(set -a; source dokumente/.env; echo "$PAPERLESS_DOMAIN")/")
 [[ -f rezepte/.env ]] && urls+=("https://$(set -a; source rezepte/.env; echo "$MEALIE_DOMAIN")/")
+[[ -f passwoerter/.env ]] && urls+=("https://$(set -a; source passwoerter/.env; echo "$VAULTWARDEN_DOMAIN")/alive")
+ha_domain=$( [[ -f smarthome/.env ]] && (set -a; source smarthome/.env; echo "${HA_DOMAIN:-}") || true)
+[[ -z "$ha_domain" ]] || urls+=("https://$ha_domain/")
 for u in "${urls[@]}"; do
   code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "$u")
   if [[ $code =~ ^[23] ]]; then

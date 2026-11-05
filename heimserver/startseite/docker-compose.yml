@@ -1,0 +1,22 @@
+# Startseite (Homepage) mit Links und Status aller Dienste – nur im Heimnetz.
+#
+# Alle Ports sind an die LAN-Adresse gebunden (HOMEPAGE_IP in .env), also weder aus dem
+# Internet noch über den WireGuard-Tunnel erreichbar. Die Dienste-Liste erzeugt install.sh.
+
+name: homepage
+
+services:
+  homepage:
+    container_name: homepage
+    image: ghcr.io/gethomepage/homepage:latest
+    restart: always
+    ports:
+      - '${HOMEPAGE_IP}:3010:3000'
+    volumes:
+      - ./config:/app/config
+      # Nur lesend, für die Anzeige des freien Speichers
+      - /mnt/daten:/mnt/daten:ro
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_IP}:3010
+      PUID: '1000'
+      PGID: '1000'

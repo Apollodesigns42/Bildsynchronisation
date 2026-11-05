@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 docker compose version >/dev/null 2>&1 || { echo "Docker fehlt – zuerst heimserver/install.sh ausführen."; exit 1; }
 
 if [[ ! -f .env ]]; then
-  detected=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for (i = 1; i <= NF; i++) if ($i == "src") print $(i + 1)}')
+  detected=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for (i = 1; i <= NF; i++) if ($i == "src") print $(i + 1)}' || true)
   read -rp "LAN-Adresse des Mini-PCs [${detected}]: " lan_ip
   lan_ip=${lan_ip:-$detected}
   [[ -n "$lan_ip" ]] || { echo "Keine Adresse angegeben."; exit 1; }

@@ -1,0 +1,24 @@
+# Smart-Home-Zentrale mit Home Assistant (Container-Variante).
+#
+# Basiert auf der offiziellen Docker-Compose-Anleitung:
+#   https://www.home-assistant.io/installation/linux#docker-compose
+# network_mode: host ist nötig, damit Home Assistant Geräte im Heimnetz selbst findet
+# (mDNS/SSDP). privileged erlaubt Zugriff auf Bluetooth und USB-Funksticks (Zigbee/Thread).
+# Über den WireGuard-Tunnel erreichbar nur, wenn install.sh mit Domain ausgeführt wurde.
+
+name: homeassistant
+
+services:
+  homeassistant:
+    container_name: homeassistant
+    image: ghcr.io/home-assistant/home-assistant:stable
+    restart: always
+    stop_grace_period: 60s
+    privileged: true
+    network_mode: host
+    volumes:
+      - ./config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    environment:
+      TZ: Europe/Berlin

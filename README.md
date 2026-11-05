@@ -27,6 +27,9 @@ leitet über einen verschlüsselten Tunnel nach Hause weiter. Ein **verschlüsse
 | Rezepte & Einkaufsliste | Mealie: Rezepte per Link importieren, Wochenplan, gemeinsame Einkaufsliste |
 | Werbeblocker fürs Heimnetz | AdGuard Home: filtert Werbung und Tracking für alle Geräte zu Hause |
 | Überwachung von außen | Uptime Kuma auf dem VPS: Push-Nachricht aufs Handy, wenn ein Dienst ausfällt |
+| Passwortmanager | Vaultwarden: kompatibel mit den Bitwarden-Apps, gemeinsame Tresore für die Familie |
+| Smart-Home-Zentrale | Home Assistant: alle smarten Geräte in einer App, herstellerübergreifende Automationen |
+| Startseite | Homepage: Links und Status aller Dienste auf einen Blick (nur Heimnetz) |
 | Backup | Nächtlich, verschlüsselt und mit mehreren Versionen (restic) auf die Hetzner Storage Box |
 
 Die Daten liegen physisch bei dir zu Hause. Die KI-Auswertung läuft lokal, nichts geht an Dritte.
@@ -63,6 +66,9 @@ Handy/Browser ──HTTPS──► VPS (IONOS)  ══ WireGuard-Tunnel ══�
 | `heimserver/rezepte/` | Mini-PC | Mealie (Rezepte, Wochenplan, Einkaufsliste): `docker-compose.yml` + `install.sh` |
 | `heimserver/adguard/` | Mini-PC | AdGuard Home (nur Heimnetz): `docker-compose.yml` + `install.sh` |
 | `vps/uptime-kuma/` | VPS | Uptime Kuma: überwacht alle Dienste von außen |
+| `heimserver/passwoerter/` | Mini-PC | Vaultwarden: `docker-compose.yml`, `install.sh`, `registrierung.sh` |
+| `heimserver/smarthome/` | Mini-PC | Home Assistant: `docker-compose.yml` + `install.sh` |
+| `heimserver/startseite/` | Mini-PC | Homepage (nur Heimnetz): `docker-compose.yml` + `install.sh` |
 | `heimserver/tunnel.sh` | Mini-PC | Spielt die WireGuard-Konfiguration ein |
 | `heimserver/backup.sh` | Mini-PC | Nächtliches verschlüsseltes Backup (Fotos, Cloud, Dokumente) auf die Storage Box |
 | `heimserver/check.sh` | Mini-PC | Täglicher Gesundheits-Check mit E-Mail bei Problemen |
@@ -272,6 +278,82 @@ tauchen die Anfragen auf (alle mit der Adresse der FritzBox, weil sie weiterleit
 **Wenn eine Seite oder App plötzlich nicht mehr funktioniert:** Im Abfrageprotokoll nach der gesperrten Adresse suchen
 und auf **„Freigeben“** klicken.
 
+### 9. Passwortmanager (Vaultwarden) einrichten (optional)
+
+[Vaultwarden](https://github.com/dani-garcia/vaultwarden) ist ein schlanker, mit **Bitwarden** kompatibler Server.
+Genutzt wird er mit den offiziellen, kostenlosen **Bitwarden-Apps** (Browser-Erweiterung, Windows/Mac/Linux,
+Android, iOS) – inklusive automatischem Ausfüllen, 2FA-Codes und Passkeys.
+
+⚠️ Hier liegen alle Passwörter. Deshalb:
+- **Das Master-Passwort kann niemand zurücksetzen** – auch der Admin nicht. Vergessen = Daten weg. Aufschreiben und
+  sicher verwahren (z.B. im Tresor/Bankschließfach).
+- **Erst einrichten, wenn Backup und Überwachung ein paar Wochen zuverlässig laufen.**
+- Zusätzlich zum nächtlichen Backup gelegentlich einen **verschlüsselten Export** (Bitwarden-App → Tresor exportieren
+  → „.json (verschlüsselt)“) auf einen USB-Stick an einem sicheren Ort.
+
+**Einrichtung:**
+1. DNS: Subdomain (z.B. `passwort.deine-domain.de`) auf den VPS; im Caddyfile `reverse_proxy 10.77.0.2:8222`.
+   Die Bitwarden-Apps funktionieren nur über HTTPS – die Domain ist also Pflicht.
+2. Installieren und Registrierung **nur kurz** öffnen:
+   ```bash
+   cd bildsynchronisation/heimserver/passwoerter
+   ./install.sh                 # Domain abfragen
+   ./registrierung.sh an
+   ```
+3. `https://passwort.deine-domain.de` öffnen → **Konto erstellen** (für dich und deine Frau, jeweils eigenes
+   Master-Passwort) → in den Einstellungen jeweils die **Zwei-Faktor-Anmeldung** aktivieren.
+4. Registrierung **sofort wieder schließen**:
+   ```bash
+   ./registrierung.sh aus
+   ```
+5. Gemeinsame Passwörter: im Web-Tresor *Neue Organisation* (z.B. „Familie“) anlegen und deine Frau einladen
+   (ohne Mailserver: Einladung annehmen, indem sie sich anmeldet; danach in der Organisation „Bestätigen“ klicken).
+6. **Umzug aus 1Password:** In 1Password exportieren (`.1pux`), im Web-Tresor *Werkzeuge → Daten importieren →
+   1Password (1pux)*. Danach die Exportdatei **sicher löschen** (sie ist unverschlüsselt). Dateianhänge werden nicht
+   übernommen.
+7. In den **Bitwarden-Apps** vor dem Anmelden *Selbst gehostet* wählen und die Server-URL eintragen.
+
+Die Apps haben eine **Offline-Kopie**: Ist der Server kurz nicht erreichbar, kommt man weiter an alle Passwörter.
+
+### 10. Smart Home (Home Assistant) einrichten (optional)
+
+[Home Assistant](https://www.home-assistant.io) bündelt smarte Geräte verschiedener Hersteller (z.B. tado, FritzBox,
+Mähroboter) in einer Oberfläche und verbindet sie über Automationen. Es läuft im Netzwerk des Mini-PCs
+(„Host-Modus“), damit es Geräte im Heimnetz selbst findet.
+
+```bash
+cd bildsynchronisation/heimserver/smarthome
+./install.sh            # Domain z.B. haus.deine-domain.de – oder leer lassen = nur Heimnetz
+```
+
+1. Im Heimnetz `http://<IP des Mini-PCs>:8123` öffnen und **sofort das Konto anlegen** (die Startseite ist bis dahin
+   offen). Standort, Einheiten und Sprache einstellen.
+2. **Erst danach** – falls gewünscht – die Domain freischalten: DNS auf den VPS, im Caddyfile
+   `reverse_proxy 10.77.0.2:8123`. Mit Domain hat `install.sh` den Tunnel bereits für Port 8123 geöffnet und die
+   nötige Proxy-Einstellung in `config/configuration.yaml` hinterlegt.
+3. Geräte unter *Einstellungen → Geräte & Dienste* hinzufügen. Viele werden automatisch gefunden.
+4. Auf dem Handy die App **„Home Assistant“** installieren (Server-URL: die Domain bzw. im Heimnetz die IP).
+   Darüber erkennt Home Assistant auch, wer zu Hause ist.
+
+Hinweise: Die Container-Variante hat keinen eingebauten Add-on-Store; Erweiterungen aus der Community (z.B. für den
+Dreame-Mähroboter) installiert man über **HACS** (Anleitung auf hacs.xyz). Für Zigbee/Thread-Geräte braucht es einen
+USB-Funkstick am Mini-PC.
+
+### 11. Startseite (Homepage) einrichten (optional)
+
+Eine Übersichtsseite mit Links zu allen Diensten, grüner/roter Statusanzeige sowie Auslastung von Prozessor,
+Arbeitsspeicher und Festplatten. **Nur im Heimnetz** erreichbar.
+
+```bash
+cd bildsynchronisation/heimserver/startseite
+./install.sh            # erkennt automatisch alle installierten Dienste
+```
+
+Danach `http://<IP des Mini-PCs>:3010` als Startseite im Browser festlegen. Kommt später ein weiterer Dienst dazu:
+`./install.sh neu` erzeugt die Liste neu (eigene Änderungen an `config/services.yaml` gehen dabei verloren).
+
+**Am besten zuletzt installieren**, wenn alle anderen Dienste laufen – dann sind gleich alle auf der Startseite.
+
 ## Überwachung von außen (Uptime Kuma auf dem VPS)
 
 Der tägliche Check auf dem Mini-PC meldet Probleme per Mail – fällt der Mini-PC aber ganz aus (Strom, Internet,
@@ -319,7 +401,7 @@ Webseiten auf dem VPS lassen sich genauso mit überwachen.
 So liest man eine Meldung: Fallen **alle** Heimdienste und der Tunnel gleichzeitig aus, ist der Mini-PC oder das
 Internet daheim weg. Fällt nur **einer** aus, hängt dieser eine Dienst (`docker compose ps` auf dem Mini-PC).
 
-### 9. Empfohlene Immich-Einstellungen nach dem ersten Login
+### 12. Empfohlene Immich-Einstellungen nach dem ersten Login
 
 Unter *Administration → Einstellungen*:
 

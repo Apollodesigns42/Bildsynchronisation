@@ -84,6 +84,33 @@ if [[ -f rezepte/.env ]]; then
   )
 fi
 
+# --- Passwortmanager (Vaultwarden), falls eingerichtet ---
+if [[ -f passwoerter/.env ]]; then
+  (
+    cd passwoerter
+    set -a; source .env; set +a
+    # SQLite-Datenbank: für ein stimmiges Backup kurz anhalten (wenige Sekunden)
+    trap 'docker start vaultwarden >/dev/null' EXIT
+    docker stop vaultwarden >/dev/null
+    restic backup "${limit[@]}" --tag vaultwarden "$(realpath "$VAULTWARDEN_DATA_DIR")"
+  )
+fi
+
+# --- Smart Home (Home Assistant), falls eingerichtet ---
+if [[ -f smarthome/.env ]]; then
+  (
+    # Datenbank mit dem Verlauf: für ein stimmiges Backup kurz anhalten (ca. 1 Minute)
+    trap 'docker start homeassistant >/dev/null' EXIT
+    docker stop homeassistant >/dev/null
+    restic backup "${limit[@]}" --tag homeassistant "$(realpath smarthome/config)"
+  )
+fi
+
+# --- Startseite (Homepage), falls eingerichtet – nur die Einstellungen ---
+if [[ -f startseite/.env ]]; then
+  restic backup "${limit[@]}" --tag homepage "$(realpath startseite/config)"
+fi
+
 # --- Werbeblocker (AdGuard Home), falls eingerichtet – nur die Einstellungen ---
 if [[ -f adguard/.env ]]; then
   restic backup "${limit[@]}" --tag adguard "$(realpath adguard/conf)"

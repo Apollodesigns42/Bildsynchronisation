@@ -21,3 +21,6 @@ heimserver/rezepte/data/
 vps/uptime-kuma/data/
 heimserver/adguard/conf/
 heimserver/adguard/work/
+heimserver/passwoerter/data/
+heimserver/smarthome/config/
+heimserver/startseite/config/

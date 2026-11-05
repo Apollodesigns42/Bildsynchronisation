@@ -10,6 +10,8 @@ WireGuard-Tunnel an den Mini-PC weiter:
 | Cloud (OpenCloud) | `http://10.77.0.2:9200` |
 | Dokumente (Paperless-ngx) | `http://10.77.0.2:8000` |
 | Rezepte (Mealie) | `http://10.77.0.2:9925` |
+| Passwörter (Vaultwarden) | `http://10.77.0.2:8222` |
+| Smart Home (Home Assistant) | `http://10.77.0.2:8123` |
 
 Die Beispiele unten zeigen die Foto-Domain. Für Cloud, Dokumente und Rezepte legst du je einen gleich
 aufgebauten Eintrag mit der jeweiligen Domain und Port **9200**, **8000** bzw. **9925** an.
