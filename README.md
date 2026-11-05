@@ -270,10 +270,15 @@ cd bildsynchronisation/heimserver/adguard
    - Bevorzugter DNSv4-Server: **IP des Mini-PCs** (z.B. `192.168.178.23`)
    - Alternativer DNSv4-Server: **`9.9.9.9`**
 
+   - **„Andere DNSv6-Server verwenden“** – sonst fragt die FritzBox über IPv6 am Filter vorbei:
+     Bevorzugter DNSv6-Server: die **IPv6-Adresse des Mini-PCs**, die `install.sh` anzeigt (beginnt mit `fd`,
+     steht auch als `ADGUARD_IP6` in `adguard/.env`), alternativer DNSv6-Server: **`2620:fe::fe`** (Quad9)
+   - Haken bei **„Verschlüsselte Namensauflösung im Internet (DNS over TLS)“** entfernen, falls gesetzt
+
    Die FritzBox fragt dann zuerst AdGuard. Ist der Mini-PC aus, nimmt sie Quad9 – das Internet funktioniert weiter,
    nur eben ohne Werbefilter.
 
-**Test:** Am PC `nslookup doubleclick.net` eingeben – die Antwort sollte `0.0.0.0` sein. Im AdGuard-Abfrageprotokoll
+**Test:** Am PC `ipconfig /flushdns` und dann `nslookup googleads.g.doubleclick.net` – die Antwort sollte `0.0.0.0` bzw. `::` sein. Im AdGuard-Abfrageprotokoll
 tauchen die Anfragen auf (alle mit der Adresse der FritzBox, weil sie weiterleitet).
 
 **Wenn eine Seite oder App plötzlich nicht mehr funktioniert:** Im Abfrageprotokoll nach der gesperrten Adresse suchen

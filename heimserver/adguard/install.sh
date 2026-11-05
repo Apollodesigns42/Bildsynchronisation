@@ -15,12 +15,27 @@ if [[ ! -f .env ]]; then
 else
   echo ".env existiert bereits – wird unverändert verwendet."
 fi
+
+# Lokale IPv6-Adresse (ULA, fd…) ergänzen – auch bei einer bestehenden .env ohne diesen Eintrag
+if ! grep -q '^ADGUARD_IP6=..*' .env; then
+  ip6=$(ip -6 addr show scope global 2>/dev/null | awk '/inet6 fd/ && !/temporary/ {sub("/.*", "", $2); print $2; exit}' || true)
+  if [[ -n "$ip6" ]]; then
+    if grep -q '^ADGUARD_IP6=' .env; then
+      sed -i "s|^ADGUARD_IP6=.*|ADGUARD_IP6=${ip6}|" .env
+    else
+      echo "ADGUARD_IP6=${ip6}" >> .env
+    fi
+    echo "IPv6-Adresse erkannt: ${ip6}"
+  else
+    echo "Keine lokale IPv6-Adresse (fd…) gefunden – AdGuard lauscht nur über IPv4."
+  fi
+fi
 set -a; source .env; set +a
 
 # Die Ports hängen an der LAN-Adresse. Damit AdGuard auch dann startet, wenn Docker beim
 # Hochfahren schneller ist als die Netzwerkkarte, darf an noch nicht vorhandene Adressen
 # gebunden werden.
-echo 'net.ipv4.ip_nonlocal_bind = 1' | sudo tee /etc/sysctl.d/99-adguard.conf >/dev/null
+printf 'net.ipv4.ip_nonlocal_bind = 1\nnet.ipv6.ip_nonlocal_bind = 1\n' | sudo tee /etc/sysctl.d/99-adguard.conf >/dev/null
 sudo sysctl -q --system
 
 mkdir -p conf work
@@ -31,3 +46,4 @@ echo
 echo "AdGuard läuft. Einrichtungsassistent: http://${ADGUARD_IP}:3000"
 echo "Im Assistenten Weboberfläche auf Port 80 und DNS-Server auf Port 53 lassen."
 echo "Danach erreichst du AdGuard unter: http://${ADGUARD_IP}:3080"
+[[ -z "${ADGUARD_IP6:-}" ]] || echo "FritzBox: als DNSv6-Server ${ADGUARD_IP6} eintragen (siehe README)."

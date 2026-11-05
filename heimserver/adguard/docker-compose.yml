@@ -1,7 +1,8 @@
 # Werbe- und Tracking-Blocker für das ganze Heimnetz mit AdGuard Home.
 #
-# Läuft nur im Heimnetz: Alle Ports sind an die LAN-Adresse des Mini-PCs gebunden
-# (ADGUARD_IP in .env) – weder aus dem Internet noch über den WireGuard-Tunnel erreichbar.
+# Läuft nur im Heimnetz: Alle Ports sind an die LAN-Adressen des Mini-PCs gebunden
+# (ADGUARD_IP und ADGUARD_IP6 in .env) – weder aus dem Internet noch über den Tunnel erreichbar.
+# Die IPv6-Adresse ist nötig, weil die FritzBox DNS-Anfragen auch über IPv6 weiterleitet.
 # Die FritzBox leitet ihre DNS-Anfragen hierher (siehe README).
 
 name: adguard
@@ -14,6 +15,9 @@ services:
     ports:
       - '${ADGUARD_IP}:53:53/tcp'
       - '${ADGUARD_IP}:53:53/udp'
+      # IPv6 (lokale fd…-Adresse des Mini-PCs). Ohne ADGUARD_IP6 nur auf ::1 (wirkungslos).
+      - '[${ADGUARD_IP6:-::1}]:53:53/tcp'
+      - '[${ADGUARD_IP6:-::1}]:53:53/udp'
       # Einrichtungsassistent (nur beim ersten Start nötig)
       - '${ADGUARD_IP}:3000:3000/tcp'
       # Weboberfläche nach der Einrichtung
