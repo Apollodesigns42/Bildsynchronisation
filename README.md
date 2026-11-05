@@ -354,6 +354,19 @@ Danach `http://<IP des Mini-PCs>:3010` als Startseite im Browser festlegen. Komm
 
 **Am besten zuletzt installieren**, wenn alle anderen Dienste laufen – dann sind gleich alle auf der Startseite.
 
+### 12. Empfohlene Immich-Einstellungen nach dem ersten Login
+
+Unter *Administration → Einstellungen*:
+
+1. **Server → Externe Domain**: `https://fotos.deine-domain.de` eintragen, damit geteilte Links die richtige Adresse
+   bekommen.
+2. **Gesichtserkennung**: ist standardmäßig aktiv. Nach dem ersten großen Import läuft sie auf dem N100 je nach
+   Bildanzahl ein bis zwei Tage. Fortschritt unter *Administration → Aufträge*. Danach unter *Erkunden → Personen*
+   die Personen benennen.
+3. **Reverse-Geocoding** (Ortsnamen aus GPS) und **Karte** sind standardmäßig aktiv.
+4. **Speichervorlage** (optional): aktivieren, damit die Dateien nach Datum abgelegt werden, z.B.
+   `{{y}}/{{y}}-{{MM}}/{{filename}}`. So bleibt die Ordnerstruktur auch ohne Immich verständlich.
+
 ## Überwachung von außen (Uptime Kuma auf dem VPS)
 
 Der tägliche Check auf dem Mini-PC meldet Probleme per Mail – fällt der Mini-PC aber ganz aus (Strom, Internet,
@@ -400,19 +413,6 @@ Webseiten auf dem VPS lassen sich genauso mit überwachen.
 
 So liest man eine Meldung: Fallen **alle** Heimdienste und der Tunnel gleichzeitig aus, ist der Mini-PC oder das
 Internet daheim weg. Fällt nur **einer** aus, hängt dieser eine Dienst (`docker compose ps` auf dem Mini-PC).
-
-### 12. Empfohlene Immich-Einstellungen nach dem ersten Login
-
-Unter *Administration → Einstellungen*:
-
-1. **Server → Externe Domain**: `https://fotos.deine-domain.de` eintragen, damit geteilte Links die richtige Adresse
-   bekommen.
-2. **Gesichtserkennung**: ist standardmäßig aktiv. Nach dem ersten großen Import läuft sie auf dem N100 je nach
-   Bildanzahl ein bis zwei Tage. Fortschritt unter *Administration → Aufträge*. Danach unter *Erkunden → Personen*
-   die Personen benennen.
-3. **Reverse-Geocoding** (Ortsnamen aus GPS) und **Karte** sind standardmäßig aktiv.
-4. **Speichervorlage** (optional): aktivieren, damit die Dateien nach Datum abgelegt werden, z.B.
-   `{{y}}/{{y}}-{{MM}}/{{filename}}`. So bleibt die Ordnerstruktur auch ohne Immich verständlich.
 
 ## Handy einrichten (Auto-Sync)
 
