@@ -1,15 +1,15 @@
 # Fahrplan: noch offene Schritte
 
-Stand: Fotos (Immich), Cloud (OpenCloud), Dokumente (Paperless mit Scanner und E-Mail-Abruf), Tunnel, Backup und
-täglicher Check laufen.
+Stand: Fotos (Immich), Cloud (OpenCloud), Dokumente (Paperless mit Scanner und E-Mail-Abruf), Rezepte (Mealie),
+Werbeblocker (AdGuard), Überwachung von außen (Uptime Kuma), Tunnel, Backup und täglicher Check laufen.
 
 ## Reihenfolge
 
 | # | Schritt | Wann | Voraussetzung | Aufwand |
 |---|---|---|---|---|
-| 1 | **Uptime Kuma** auf dem VPS (README „Überwachung von außen“) | sofort | – | ~30 Min. |
-| 2 | **AdGuard Home** auf dem NUC (README Schritt 8) | sofort | – | ~30 Min. |
-| 3 | **Mealie** (README Schritt 7) | sobald `www.wuerminghausen.si` aufgelöst wird | DNS bei deSEC aktiv | ~20 Min. |
+| 1 | ✓ **Uptime Kuma** auf dem VPS | erledigt | – | – |
+| 2 | ✓ **AdGuard Home** auf dem NUC (IPv4 + IPv6, Filter-Check im täglichen Check) | erledigt | – | – |
+| 3 | ✓ **Mealie** unter `www.wuerminghausen.si` | erledigt | – | – |
 | 4 | ✓ **iPhone deiner Frau** auf dein Immich-Konto umgestellt, Partnerfreigabe aufgehoben | erledigt | – | – |
 | 5 | **Google-Takeout-Import** (beide Konten nacheinander), danach **externe Festplatte** | Exporte liegen vor | `import.env` am PC | Stunden, über Nacht |
 | 6 | **iCloud-Export** anfordern und importieren | jetzt anfordern, Import nach 5 | Export von privacy.apple.com | je nach Menge |
@@ -29,7 +29,7 @@ Während der großen Importe (5, 6) den Arbeitsspeicher mit `free -h` beobachten
 | Fotos (Immich) | `www.wuerminghausen.org` | ✓ eingerichtet | **nötig** – Handy-Backup und Ansicht unterwegs |
 | Cloud (OpenCloud) | `www.wuerminghausen.net` | ✓ eingerichtet | **nötig** – OpenCloud funktioniert nur über eine feste Adresse (Anmeldung), auch daheim |
 | Dokumente (Paperless) | `www.wuerminghausen.eu` | ✓ eingerichtet | **empfehlenswert** – Dokumente unterwegs abrufen, Handy-App |
-| Rezepte (Mealie) | `www.wuerminghausen.si` | ✓ DNS bei deSEC aktiv | **empfehlenswert** – Einkaufsliste im Supermarkt |
+| Rezepte (Mealie) | `www.wuerminghausen.si` | ✓ eingerichtet (DNS bei deSEC) | **empfehlenswert** – Einkaufsliste im Supermarkt |
 | Passwörter (Vaultwarden) | `www.wuerminghausen.wf` (DNS bei Regery) | offen | **nötig** – die Bitwarden-Apps funktionieren nur über HTTPS |
 | Smart Home (Home Assistant) | `www.florian.lv` (DNS bei Regery) | offen | **optional** – nur nötig für Steuerung unterwegs und Anwesenheitserkennung über die App außer Haus |
 | Werbeblocker (AdGuard) | – | – | **keine** – nur im Heimnetz |
