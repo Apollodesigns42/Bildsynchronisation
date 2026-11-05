@@ -151,15 +151,19 @@ fi
 
 # --- 5b. Werbefilter: leitet die FritzBox wirklich an AdGuard weiter? -------------
 # Die FritzBox wechselt bei kurzen Aussetzern von AdGuard auf den alternativen DNS-Server
-# (z.B. Quad9) und bleibt dort – dann ist der Filter unbemerkt aus. Test: Eine bekannte
-# Werbeadresse muss über den normalen Weg (Mini-PC → FritzBox → AdGuard) auf 0.0.0.0 führen.
+# (z.B. Quad9) und bleibt dort – dann ist der Filter unbemerkt aus. Test über den normalen
+# Weg (Mini-PC → FritzBox → AdGuard): Eine bekannte Werbeadresse darf nicht auf eine echte
+# Adresse führen. Die FritzBox verwirft die Sperr-Antwort 0.0.0.0 (DNS-Rebind-Schutz), daher
+# zählt auch „keine Antwort“ als gesperrt – sofern eine normale Adresse aufgelöst wird.
 if [[ -f adguard/.env ]]; then
   test_domain=${ADGUARD_TEST_DOMAIN:-googleads.g.doubleclick.net}
+  control_domain=${ADGUARD_CONTROL_DOMAIN:-www.wikipedia.org}
   resolvectl flush-caches >/dev/null 2>&1 || true
-  answer=$(getent ahostsv4 "$test_domain" 2>/dev/null | awk 'NR == 1 {print $1}')
-  if [[ -z "$answer" ]]; then
-    problem "Werbefilter: $test_domain lässt sich gar nicht auflösen – DNS im Heimnetz gestört?"
-  elif [[ "$answer" != "0.0.0.0" ]]; then
+  ad=$(getent ahostsv4 "$test_domain" 2>/dev/null | awk 'NR == 1 {print $1}')
+  normal=$(getent ahostsv4 "$control_domain" 2>/dev/null | awk 'NR == 1 {print $1}')
+  if [[ -z "$normal" ]]; then
+    problem "DNS im Heimnetz gestört: Selbst $control_domain lässt sich nicht auflösen."
+  elif [[ -n "$ad" && "$ad" != "0.0.0.0" ]]; then
     problem "Werbefilter ist aus: Die FritzBox nutzt nicht AdGuard (vermutlich auf dem alternativen DNS-Server hängen geblieben). Abhilfe: FritzBox neu starten; danach im Online-Monitor prüfen, dass ein AdGuard-Server „aktuell genutzt“ wird."
   else
     info "Werbefilter: aktiv (FritzBox leitet an AdGuard weiter)"
