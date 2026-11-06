@@ -678,6 +678,17 @@ cd bildsynchronisation/vps && docker compose logs caddy   # HTTPS/Zertifikat (fa
 - **Gesichter werden nicht erkannt**: *Administration → Aufträge → Gesichtserkennung → Fehlende*.
 - **Falsches Datum bei alten Bildern**: Fehlen EXIF-Daten, liest immich-go das Datum aus dem Dateinamen. In der
   Weboberfläche lässt sich das Datum mehrerer Bilder gleichzeitig korrigieren (Auswahl → „Datum ändern“).
-- **Mehr Tempo auf dem N100** (optional): Immich kann die Grafikeinheit des N100 für Videos (Quick Sync) und
-  Gesichtserkennung (OpenVINO) nutzen, siehe [Hardware-Transkodierung](https://docs.immich.app/features/hardware-transcoding)
-  und [ML-Beschleunigung](https://docs.immich.app/features/ml-hardware-acceleration).
+- **Mehr Tempo mit der Intel-Grafik** (optional): Immich kann Videos über **Quick Sync** umwandeln und – experimentell –
+  die Gesichtserkennung über **OpenVINO** laufen lassen. Das entlastet den Prozessor deutlich.
+  ```bash
+  cd bildsynchronisation/heimserver
+  ./beschleunigung.sh status   # zeigt die Grafikeinheiten (Intel/AMD)
+  ./beschleunigung.sh video    # Videos über Quick Sync (empfohlen)
+  ./beschleunigung.sh ki       # zusätzlich Gesichtserkennung über OpenVINO (bei älterer Intel-Grafik ggf. instabil, mehr RAM)
+  ./beschleunigung.sh aus      # zurück auf den Prozessor
+  ```
+  Danach in Immich unter *Administration → Einstellungen → Videotranskodierung → Hardware-Beschleunigung* **Quick
+  Sync** wählen, **Hardware-Dekodierung** einschalten und als **bevorzugtes Gerät** die Intel-Grafik eintragen, die das
+  Skript anzeigt (wichtig bei Geräten mit zusätzlicher AMD-Grafik wie dem NUC8i5INH). Hintergrund:
+  [Hardware-Transkodierung](https://docs.immich.app/features/hardware-transcoding),
+  [ML-Beschleunigung](https://docs.immich.app/features/ml-hardware-acceleration).
