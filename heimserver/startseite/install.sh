@@ -74,9 +74,10 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
     fi
     if [[ -f ../smarthome/.env ]]; then
       ha=$(val smarthome HA_DOMAIN)
+      if [[ -n "$ha" ]]; then ha_url="https://$ha"; else ha_url="http://$ip:8123"; fi
       echo "    - Smart Home:"
       echo "        icon: mdi-home-automation"
-      echo "        href: ${ha:+https://$ha}${ha:-http://$ip:8123}"
+      echo "        href: $ha_url"
       echo "        description: Home Assistant"
       echo "        siteMonitor: http://$ip:8123"
     fi
