@@ -688,7 +688,10 @@ cd bildsynchronisation/vps && docker compose logs caddy   # HTTPS/Zertifikat (fa
   ./beschleunigung.sh aus      # zurück auf den Prozessor
   ```
   Ohne Intel-Grafik nimmt `video` automatisch **VAAPI** über eine AMD-Grafik – so beim **NUC8i5INH**, bei dem nur die
-  Radeon 540X aktiv ist (die Gesichtserkennung bleibt dann auf dem Prozessor). Danach in Immich unter
+  Radeon 540X aktiv ist (die Gesichtserkennung bleibt dann auf dem Prozessor). ⚠️ Erfahrung mit dem NUC8i5INH: Die
+  Umwandlung über die Radeon 540X **blieb bei einzelnen Videos stundenlang hängen** (auch ohne Hardware-Dekodierung)
+  und blockierte die Warteschlange. Dort ist `./beschleunigung.sh aus` (Prozessor) die zuverlässige Wahl. Hängt die
+  Videoumwandlung: `ps -o pid,etime,args -C ffmpeg` zeigt Prozesse, die seit Stunden laufen. Danach in Immich unter
   *Administration → Einstellungen → Videotranskodierung → Hardware-Beschleunigung* das Verfahren wählen, das das Skript
   nennt (Quick Sync bzw. VAAPI), **Hardware-Dekodierung** einschalten und das angezeigte Gerät eintragen. Hintergrund:
   [Hardware-Transkodierung](https://docs.immich.app/features/hardware-transcoding),
