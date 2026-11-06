@@ -16,7 +16,7 @@ täglicher Check laufen. Videos werden über den Prozessor umgewandelt (AMD-Besc
 | 6 | **iCloud**: ältere Fotos deiner Frau (Datum 15.09.2025, ohne Standort) – prüfen, ob noch in iCloud; dann offiziellen Export importieren | Wochenende | Export von privacy.apple.com | je nach Menge |
 | 7 | ✓ Altes Immich-Konto deiner Frau gelöscht | erledigt | – | – |
 | 8 | ✓ **Home Assistant** unter `www.florian.lv` (Geräte einbinden läuft) | erledigt | – | – |
-| 9 | **Vaultwarden** (README Schritt 9) | nach den Importen **und** einigen Wochen stabilem Backup | Domain + Caddy-Eintrag, Master-Passwort sicher verwahrt | ~1 Std. inkl. 1Password-Umzug |
+| 9 | ✓ **Vaultwarden** unter `www.wuerminghausen.wf` eingerichtet (Konten angelegt, Registrierung zu). **Nutzung und 1Password-Umzug** erst nach einigen Wochen stabilem Backup | eingerichtet | Master-Passwort und 2FA-Wiederherstellungscode sicher verwahrt | ~30 Min. für den Umzug |
 | 10 | **Homepage** (README Schritt 11) | zuletzt | alle anderen Dienste installiert | ~15 Min. |
 | 11 | **MEGA kündigen**, Google Fotos/iCloud aufräumen | nach einigen Wochen Parallelbetrieb | Backups laufen nachweislich | – |
 
@@ -31,7 +31,7 @@ Während der großen Importe (5, 6) den Arbeitsspeicher mit `free -h` beobachten
 | Cloud (OpenCloud) | `www.wuerminghausen.net` | ✓ eingerichtet | **nötig** – OpenCloud funktioniert nur über eine feste Adresse (Anmeldung), auch daheim |
 | Dokumente (Paperless) | `www.wuerminghausen.eu` | ✓ eingerichtet | **empfehlenswert** – Dokumente unterwegs abrufen, Handy-App |
 | Rezepte (Mealie) | `www.wuerminghausen.si` | ✓ eingerichtet (DNS bei deSEC) | **empfehlenswert** – Einkaufsliste im Supermarkt |
-| Passwörter (Vaultwarden) | `www.wuerminghausen.wf` (DNS bei Regery) | offen | **nötig** – die Bitwarden-Apps funktionieren nur über HTTPS |
+| Passwörter (Vaultwarden) | `www.wuerminghausen.wf` (DNS bei Regery) | ✓ eingerichtet | **nötig** – die Bitwarden-Apps funktionieren nur über HTTPS |
 | Smart Home (Home Assistant) | `www.florian.lv` (DNS bei Regery) | ✓ eingerichtet | **optional** – nur nötig für Steuerung unterwegs und Anwesenheitserkennung über die App außer Haus |
 | Werbeblocker (AdGuard) | – | – | **keine** – nur im Heimnetz |
 | Startseite (Homepage) | – | – | **keine** – nur im Heimnetz |
