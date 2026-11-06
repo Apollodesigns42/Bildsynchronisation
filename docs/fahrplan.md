@@ -1,7 +1,8 @@
 # Fahrplan: noch offene Schritte
 
 Stand: Fotos (Immich), Cloud (OpenCloud), Dokumente (Paperless mit Scanner und E-Mail-Abruf), Rezepte (Mealie),
-Werbeblocker (AdGuard), Überwachung von außen (Uptime Kuma), Tunnel, Backup und täglicher Check laufen.
+Werbeblocker (AdGuard), Smart Home (Home Assistant), Überwachung von außen (Uptime Kuma), Tunnel, Backup und
+täglicher Check laufen. Videos werden über den Prozessor umgewandelt (AMD-Beschleunigung blieb hängen).
 
 ## Reihenfolge
 
@@ -11,10 +12,10 @@ Werbeblocker (AdGuard), Überwachung von außen (Uptime Kuma), Tunnel, Backup un
 | 2 | ✓ **AdGuard Home** auf dem NUC (IPv4 + IPv6, Filter-Check im täglichen Check) | erledigt | – | – |
 | 3 | ✓ **Mealie** unter `www.wuerminghausen.si` | erledigt | – | – |
 | 4 | ✓ **iPhone deiner Frau** auf dein Immich-Konto umgestellt, Partnerfreigabe aufgehoben | erledigt | – | – |
-| 5 | **Google-Takeout-Import** (beide Konten nacheinander), danach **externe Festplatte** | Exporte liegen vor | `import.env` am PC | Stunden, über Nacht |
-| 6 | **iCloud-Export** anfordern und importieren | jetzt anfordern, Import nach 5 | Export von privacy.apple.com | je nach Menge |
+| 5 | ✓ **Google-Takeout-Import** und **externe Festplatte** importiert und verarbeitet | erledigt | – | – |
+| 6 | **iCloud**: ältere Fotos deiner Frau (Datum 15.09.2025, ohne Standort) – prüfen, ob noch in iCloud; dann offiziellen Export importieren | Wochenende | Export von privacy.apple.com | je nach Menge |
 | 7 | ✓ Altes Immich-Konto deiner Frau gelöscht | erledigt | – | – |
-| 8 | **Home Assistant** (README Schritt 10) | nach den Importen | Konto sofort im Heimnetz anlegen, erst dann Domain | ~1 Std. + Geräte einrichten |
+| 8 | ✓ **Home Assistant** unter `www.florian.lv` (Geräte einbinden läuft) | erledigt | – | – |
 | 9 | **Vaultwarden** (README Schritt 9) | nach den Importen **und** einigen Wochen stabilem Backup | Domain + Caddy-Eintrag, Master-Passwort sicher verwahrt | ~1 Std. inkl. 1Password-Umzug |
 | 10 | **Homepage** (README Schritt 11) | zuletzt | alle anderen Dienste installiert | ~15 Min. |
 | 11 | **MEGA kündigen**, Google Fotos/iCloud aufräumen | nach einigen Wochen Parallelbetrieb | Backups laufen nachweislich | – |
@@ -31,7 +32,7 @@ Während der großen Importe (5, 6) den Arbeitsspeicher mit `free -h` beobachten
 | Dokumente (Paperless) | `www.wuerminghausen.eu` | ✓ eingerichtet | **empfehlenswert** – Dokumente unterwegs abrufen, Handy-App |
 | Rezepte (Mealie) | `www.wuerminghausen.si` | ✓ eingerichtet (DNS bei deSEC) | **empfehlenswert** – Einkaufsliste im Supermarkt |
 | Passwörter (Vaultwarden) | `www.wuerminghausen.wf` (DNS bei Regery) | offen | **nötig** – die Bitwarden-Apps funktionieren nur über HTTPS |
-| Smart Home (Home Assistant) | `www.florian.lv` (DNS bei Regery) | offen | **optional** – nur nötig für Steuerung unterwegs und Anwesenheitserkennung über die App außer Haus |
+| Smart Home (Home Assistant) | `www.florian.lv` (DNS bei Regery) | ✓ eingerichtet | **optional** – nur nötig für Steuerung unterwegs und Anwesenheitserkennung über die App außer Haus |
 | Werbeblocker (AdGuard) | – | – | **keine** – nur im Heimnetz |
 | Startseite (Homepage) | – | – | **keine** – nur im Heimnetz |
 | Überwachung (Uptime Kuma) | – | – | **keine** – Zugriff per SSH-Tunnel, Benachrichtigung per ntfy |
