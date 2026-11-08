@@ -103,13 +103,17 @@ layout:
     columns: 4
 CONF
 
+sudo mkdir -p /var/lib/heimserver   # Systemplatte für die Speicheranzeige
 [[ -f config/widgets.yaml ]] || cat > config/widgets.yaml <<'CONF'
 - resources:
     cpu: true
     memory: true
-    disk:
-      - /
-      - /mnt/daten
+- resources:
+    label: System
+    disk: /mnt/system
+- resources:
+    label: Daten
+    disk: /mnt/daten
 - datetime:
     text_size: md
     format:

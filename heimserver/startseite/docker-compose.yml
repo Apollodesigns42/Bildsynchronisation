@@ -14,7 +14,9 @@ services:
       - '${HOMEPAGE_IP}:3010:3000'
     volumes:
       - ./config:/app/config
-      # Nur lesend, für die Anzeige des freien Speichers
+      # Nur lesend, für die Anzeige des freien Speichers. Ein beliebiger Ordner der
+      # Systemplatte genügt – "/" im Container wäre Dockers eigenes Dateisystem.
+      - /var/lib/heimserver:/mnt/system:ro
       - /mnt/daten:/mnt/daten:ro
     environment:
       HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_IP}:3010
