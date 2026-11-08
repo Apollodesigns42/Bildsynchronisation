@@ -37,6 +37,10 @@ esac
 
 echo "== $(date '+%F %T') Backup startet"
 
+# Sperren abgebrochener Läufe entfernen (z.B. nach Neustart oder Verbindungsabbruch).
+# restic entfernt dabei nur verwaiste Sperren, nie die eines laufenden Backups.
+restic unlock
+
 # --- Fotos (Immich) ---
 set -a; source .env; set +a
 UPLOAD_LOCATION=$(realpath "$UPLOAD_LOCATION")
