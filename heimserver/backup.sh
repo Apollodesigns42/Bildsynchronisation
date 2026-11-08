@@ -17,6 +17,21 @@ command -v restic >/dev/null 2>&1 || { echo "restic fehlt: sudo apt install rest
 set -a; source backup.env; set +a
 limit=(); [[ -z "${BWLIMIT:-}" ]] || limit=(--limit-upload "$BWLIMIT")
 
+# restic backup mit bis zu drei Versuchen: Bricht die Verbindung zur Storage Box ab
+# ("Connection reset by peer"), wird nach zwei Minuten neu verbunden und weitergemacht.
+# Bereits hochgeladene Teile werden dabei nicht noch einmal übertragen.
+sichern() {
+  local versuch
+  for versuch in 1 2 3; do
+    restic backup "${limit[@]}" "$@" && return 0
+    (( versuch < 3 )) || break
+    echo "-- Versuch $versuch fehlgeschlagen, neuer Versuch in 2 Minuten"
+    sleep 120
+    restic unlock || true
+  done
+  return 1
+}
+
 case ${1:-run} in
   init)
     if [[ ! -s $RESTIC_PASSWORD_FILE ]]; then
@@ -50,7 +65,7 @@ docker exec immich_postgres pg_dumpall --clean --if-exists --username="$DB_USERN
 ls -1t "$UPLOAD_LOCATION"/backups/manual-*.sql.gz 2>/dev/null | tail -n +4 | xargs -r rm --
 
 # Vorschaubilder und umgewandelte Videos erzeugt Immich bei Bedarf neu.
-restic backup "${limit[@]}" --tag immich \
+sichern --tag immich \
   --exclude "$UPLOAD_LOCATION/thumbs" --exclude "$UPLOAD_LOCATION/encoded-video" \
   "$UPLOAD_LOCATION"
 
@@ -62,7 +77,7 @@ if [[ -f cloud/.env ]]; then
     # Für ein stimmiges Backup wird OpenCloud kurz angehalten (nachts unkritisch).
     trap 'docker start opencloud >/dev/null' EXIT
     docker stop opencloud >/dev/null
-    restic backup "${limit[@]}" --tag opencloud "$(realpath "$OC_CONFIG_DIR")" "$(realpath "$OC_DATA_DIR")"
+    sichern --tag opencloud "$(realpath "$OC_CONFIG_DIR")" "$(realpath "$OC_DATA_DIR")"
   )
 fi
 
@@ -72,7 +87,7 @@ if [[ -f dokumente/.env ]]; then
     cd dokumente
     set -a; source .env; set +a
     docker exec paperless_db pg_dump -U paperless paperless | gzip > "$PAPERLESS_DATA_DIR/datenbank.sql.gz"
-    restic backup "${limit[@]}" --tag paperless "$(realpath "$PAPERLESS_DATA_DIR")" "$(realpath "$PAPERLESS_MEDIA_DIR")"
+    sichern --tag paperless "$(realpath "$PAPERLESS_DATA_DIR")" "$(realpath "$PAPERLESS_MEDIA_DIR")"
   )
 fi
 
@@ -84,7 +99,7 @@ if [[ -f rezepte/.env ]]; then
     # SQLite-Datenbank: für ein stimmiges Backup Mealie kurz anhalten (wenige Sekunden)
     trap 'docker start mealie >/dev/null' EXIT
     docker stop mealie >/dev/null
-    restic backup "${limit[@]}" --tag mealie "$(realpath "$MEALIE_DATA_DIR")"
+    sichern --tag mealie "$(realpath "$MEALIE_DATA_DIR")"
   )
 fi
 
@@ -96,7 +111,7 @@ if [[ -f passwoerter/.env ]]; then
     # SQLite-Datenbank: für ein stimmiges Backup kurz anhalten (wenige Sekunden)
     trap 'docker start vaultwarden >/dev/null' EXIT
     docker stop vaultwarden >/dev/null
-    restic backup "${limit[@]}" --tag vaultwarden "$(realpath "$VAULTWARDEN_DATA_DIR")"
+    sichern --tag vaultwarden "$(realpath "$VAULTWARDEN_DATA_DIR")"
   )
 fi
 
@@ -106,18 +121,18 @@ if [[ -f smarthome/.env ]]; then
     # Datenbank mit dem Verlauf: für ein stimmiges Backup kurz anhalten (ca. 1 Minute)
     trap 'docker start homeassistant >/dev/null' EXIT
     docker stop homeassistant >/dev/null
-    restic backup "${limit[@]}" --tag homeassistant "$(realpath smarthome/config)"
+    sichern --tag homeassistant "$(realpath smarthome/config)"
   )
 fi
 
 # --- Startseite (Homepage), falls eingerichtet – nur die Einstellungen ---
 if [[ -f startseite/.env ]]; then
-  restic backup "${limit[@]}" --tag homepage "$(realpath startseite/config)"
+  sichern --tag homepage "$(realpath startseite/config)"
 fi
 
 # --- Werbeblocker (AdGuard Home), falls eingerichtet – nur die Einstellungen ---
 if [[ -f adguard/.env ]]; then
-  restic backup "${limit[@]}" --tag adguard "$(realpath adguard/conf)"
+  sichern --tag adguard "$(realpath adguard/conf)"
 fi
 
 # --- Alte Stände aufräumen (sonntags, das Aufräumen dauert etwas) ---

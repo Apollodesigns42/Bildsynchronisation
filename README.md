@@ -547,6 +547,8 @@ Eine Cloud ohne Backup ist kein Backup. Der Mini-PC sichert jede Nacht Fotos, Da
        HostName uXXXXXX.your-storagebox.de
        User uXXXXXX
        Port 23
+       ServerAliveInterval 30
+       ServerAliveCountMax 6
    ```
 
 4. Backup-Einstellungen anlegen und das verschlüsselte Repository erzeugen:
