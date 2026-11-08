@@ -350,7 +350,7 @@ cd bildsynchronisation/heimserver/smarthome
    Darüber erkennt Home Assistant auch, wer zu Hause ist.
 
 Hinweise: Die Container-Variante hat keinen eingebauten Add-on-Store; Erweiterungen aus der Community (z.B. für den
-Dreame-Mähroboter) installiert man über **HACS** (Anleitung auf hacs.xyz). Für Zigbee/Thread-Geräte braucht es einen
+Dreame-Mähroboter) installiert man über den eingebauten **Marketplace** (*Einstellungen → Marketplace*; ersetzt seit Home Assistant 2026.11 das frühere HACS). Für Zigbee/Thread-Geräte braucht es einen
 USB-Funkstick am Mini-PC.
 
 ### 11. Startseite (Homepage) einrichten (optional)
