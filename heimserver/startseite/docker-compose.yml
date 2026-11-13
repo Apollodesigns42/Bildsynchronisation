@@ -22,3 +22,15 @@ services:
       HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_IP}:3010
       PUID: '1000'
       PGID: '1000'
+
+  # Gibt der Startseite nur Lesezugriff auf die Container-Liste (läuft / gestoppt),
+  # statt ihr den vollen Docker-Zugang zu geben. Kein Port nach außen.
+  dockerproxy:
+    container_name: homepage_dockerproxy
+    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    restart: always
+    environment:
+      CONTAINERS: 1
+      POST: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro

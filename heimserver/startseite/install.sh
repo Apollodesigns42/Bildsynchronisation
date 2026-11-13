@@ -37,12 +37,16 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
     echo "        href: ${photos:-http://$ip:2283}"
     echo "        description: Immich"
     echo "        siteMonitor: http://$ip:2283"
+    echo "        server: heimserver"
+    echo "        container: immich_server"
     if [[ -f ../cloud/.env ]]; then
       echo "    - Cloud:"
       echo "        icon: mdi-cloud"
       echo "        href: https://$(val cloud OC_DOMAIN)"
       echo "        description: OpenCloud"
       echo "        siteMonitor: http://$ip:9200"
+      echo "        server: heimserver"
+      echo "        container: opencloud"
     fi
     if [[ -f ../dokumente/.env ]]; then
       echo "    - Dokumente:"
@@ -50,12 +54,16 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
       echo "        href: https://$(val dokumente PAPERLESS_DOMAIN)"
       echo "        description: Paperless-ngx"
       echo "        siteMonitor: http://$ip:8000"
+      echo "        server: heimserver"
+      echo "        container: paperless"
       if [[ $(val dokumente COMPOSE_PROFILES) == *scanner* ]]; then
         echo "    - Scannen:"
         echo "        icon: mdi-scanner"
         echo "        href: http://$ip:8080"
         echo "        description: Scan direkt in Paperless"
         echo "        siteMonitor: http://$ip:8080"
+        echo "        server: heimserver"
+        echo "        container: scanservjs"
       fi
     fi
     if [[ -f ../rezepte/.env ]]; then
@@ -64,6 +72,8 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
       echo "        href: https://$(val rezepte MEALIE_DOMAIN)"
       echo "        description: Mealie – Rezepte & Einkaufsliste"
       echo "        siteMonitor: http://$ip:9925"
+      echo "        server: heimserver"
+      echo "        container: mealie"
     fi
     if [[ -f ../passwoerter/.env ]]; then
       echo "    - Passwörter:"
@@ -71,6 +81,8 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
       echo "        href: https://$(val passwoerter VAULTWARDEN_DOMAIN)"
       echo "        description: Vaultwarden"
       echo "        siteMonitor: http://$ip:8222"
+      echo "        server: heimserver"
+      echo "        container: vaultwarden"
     fi
     if [[ -f ../smarthome/.env ]]; then
       ha=$(val smarthome HA_DOMAIN)
@@ -80,14 +92,28 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
       echo "        href: $ha_url"
       echo "        description: Home Assistant"
       echo "        siteMonitor: http://$ip:8123"
+      echo "        server: heimserver"
+      echo "        container: homeassistant"
+    fi
+    if [[ -f ../adguard/.env || -f ../verwaltung/.env ]]; then
+      echo "- Verwaltung:"
+    fi
+    if [[ -f ../verwaltung/.env ]]; then
+      echo "    - Container:"
+      echo "        icon: mdi-docker"
+      echo "        href: https://$(val verwaltung PORTAINER_IP):9443"
+      echo "        description: Portainer – Dienste neu starten"
+      echo "        server: heimserver"
+      echo "        container: portainer"
     fi
     if [[ -f ../adguard/.env ]]; then
-      echo "- Verwaltung:"
       echo "    - Werbeblocker:"
       echo "        icon: mdi-shield-check"
       echo "        href: http://$(val adguard ADGUARD_IP):3080"
       echo "        description: AdGuard Home"
       echo "        siteMonitor: http://$(val adguard ADGUARD_IP):3080"
+      echo "        server: heimserver"
+      echo "        container: adguard"
     fi
   } > config/services.yaml
   echo "Dienste-Liste erzeugt: config/services.yaml"
@@ -120,7 +146,13 @@ sudo mkdir -p /var/lib/heimserver   # Systemplatte für die Speicheranzeige
       dateStyle: long
       timeStyle: short
 CONF
-touch config/bookmarks.yaml config/docker.yaml
+touch config/bookmarks.yaml
+# Container-Status über den Lese-Proxy (siehe docker-compose.yml)
+grep -q '^heimserver:' config/docker.yaml 2>/dev/null || cat >> config/docker.yaml <<'CONF'
+heimserver:
+  host: dockerproxy
+  port: 2375
+CONF
 sudo chown -R 1000:1000 config
 
 docker compose pull

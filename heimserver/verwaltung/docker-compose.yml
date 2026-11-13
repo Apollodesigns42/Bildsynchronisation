@@ -1,0 +1,18 @@
+# Container-Verwaltung mit Portainer – nur im Heimnetz.
+#
+# Zeigt alle Container mit Status, Auslastung und Protokollen und kann sie neu starten.
+# Achtung: Portainer hat über den Docker-Socket volle Kontrolle über den Server. Deshalb ist der
+# Port nur an die LAN-Adresse gebunden (PORTAINER_IP in .env) und wird NIE über den VPS freigegeben.
+
+name: portainer
+
+services:
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:lts
+    restart: always
+    ports:
+      - '${PORTAINER_IP}:9443:9443'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/data

@@ -368,6 +368,24 @@ Danach `http://<IP des Mini-PCs>:3010` als Startseite im Browser festlegen. Komm
 
 **Am besten zuletzt installieren**, wenn alle anderen Dienste laufen – dann sind gleich alle auf der Startseite.
 
+### 11a. Container-Verwaltung (Portainer) einrichten (optional)
+
+Zeigt alle Dienste (Container) mit Status, Auslastung und Protokollen – und hat für jeden einen
+**Neustart-Knopf**, z.B. wenn Paperless hängt. **Nur im Heimnetz** erreichbar.
+
+```bash
+cd bildsynchronisation/heimserver/verwaltung
+./install.sh
+```
+
+Danach **innerhalb von 5 Minuten** `https://<IP des Mini-PCs>:9443` öffnen und das Admin-Konto mit einem starken
+Passwort anlegen (sonst sperrt sich Portainer: `docker restart portainer`). Die Zertifikatswarnung des Browsers
+ist hier normal. Anschließend *Get Started* → *local* → *Containers*: Haken beim Dienst setzen → **Restart**.
+
+Wer in Portainer angemeldet ist, kann den ganzen Server steuern – deshalb nie über die Domain freigeben.
+
+Damit die Kachel auf der Startseite erscheint: in `startseite/` einmal `./install.sh neu` ausführen.
+
 ### 12. Empfohlene Immich-Einstellungen nach dem ersten Login
 
 Unter *Administration → Einstellungen*:

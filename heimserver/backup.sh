@@ -130,6 +130,11 @@ if [[ -f startseite/.env ]]; then
   sichern --tag homepage "$(realpath startseite/config)"
 fi
 
+# --- Container-Verwaltung (Portainer), falls eingerichtet – nur die Einstellungen ---
+if [[ -f verwaltung/.env ]]; then
+  sichern --tag portainer "$(realpath verwaltung/data)"
+fi
+
 # --- Werbeblocker (AdGuard Home), falls eingerichtet – nur die Einstellungen ---
 if [[ -f adguard/.env ]]; then
   sichern --tag adguard "$(realpath adguard/conf)"
