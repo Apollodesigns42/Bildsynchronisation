@@ -18,7 +18,7 @@ täglicher Check laufen. Videos werden über den Prozessor umgewandelt (AMD-Besc
 | 8 | ✓ **Home Assistant** unter `www.florian.lv` (Geräte einbinden läuft) | erledigt | – | – |
 | 9 | ✓ **Vaultwarden** unter `www.wuerminghausen.wf` eingerichtet (Konten angelegt, Registrierung zu). **Nutzung und 1Password-Umzug** erst nach einigen Wochen stabilem Backup | eingerichtet | Master-Passwort und 2FA-Wiederherstellungscode sicher verwahrt | ~30 Min. für den Umzug |
 | 10 | ✓ **Homepage** mit Container-Status, Drucker-Kachel und **Portainer** (Neustart-Knopf) | erledigt | – | – |
-| 12 | **Landingpages und halvern-industries.com** auf dem VPS (vorbereitet in einer anderen Sitzung: `Caddyfile.master`, Platzhalterseiten, `deploy.sh`) – siehe unten | offen | DNS-Einträge bei den Registraren | ~1 Std. |
+| 12 | **Landingpages und halvern-industries.com** auf dem VPS (`vps/Caddyfile`, `vps/landingpages/`) – siehe unten | offen | DNS-Einträge bei den Registraren | ~1 Std. |
 | 13 | **Alexa**: Alexa Media Player (Echos steuern) und Emulated Hue (Sprachsteuerung) | offen | 2FA-App-Schlüssel von Amazon | ~30 Min. |
 | 14 | **ESP32 als Bluetooth-Proxy** für die Hue-Lampe, sobald sie umzieht | Board bestellt | – | ~15 Min. |
 | 11 | **MEGA kündigen**, Google Fotos/iCloud aufräumen | nach einigen Wochen Parallelbetrieb | Backups laufen nachweislich | – |
@@ -84,12 +84,16 @@ Statische Seiten, die Caddy direkt aus `/var/www/<domain>/` ausliefert – unabh
 
 Pro Domain bei der jeweiligen Registrar A-Einträge `@` und `www` → `217.154.115.102`.
 
-**Wichtig vor dem Austausch der Caddyfile:** Die neue Gesamt-Caddyfile muss **alle** Heimserver-Blöcke enthalten
-(Vorlage: `vps/Caddyfile.heimserver` – Fotos, Cloud, Dokumente, Rezepte, Passwörter, Smart Home). Nie ungeprüft
-überschreiben, sondern auf dem VPS:
+**Alles liegt fertig im Projekt:** `vps/Caddyfile` ist die vollständige Konfiguration des VPS (Burgenkampf, alle
+Heimserver-Dienste, halvern, Landingpages). `vps/landingpages/install.sh` legt die Platzhalterseiten direkt auf dem
+VPS an. Ablauf auf dem VPS (im Projektordner):
 
 ```bash
-cd ~/bildsynchronisation/vps && git pull
-sudo ./caddy-check.sh /root/Caddyfile.master              # meldet fehlende Domains, prüft die Syntax
-sudo ./caddy-check.sh /root/Caddyfile.master übernehmen   # erst wenn alles passt: sichern, einspielen, neu laden
+git pull
+sudo vps/landingpages/install.sh                    # Platzhalter nach /var/www/<domain>/
+sudo vps/caddy-check.sh vps/Caddyfile               # meldet fehlende Domains, prüft die Syntax
+sudo vps/caddy-check.sh vps/Caddyfile übernehmen    # erst wenn alles passt: sichern, einspielen, neu laden
 ```
+
+halvern-industries.com: Die Website mit ihrem eigenen `deploy.sh` nach `/var/www/halvern-industries.com/`
+hochladen – die Caddy-Schritte aus deren `DEPLOY.md` entfallen (der Block steht schon in `vps/Caddyfile`).
