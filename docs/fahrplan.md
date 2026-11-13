@@ -17,7 +17,10 @@ täglicher Check laufen. Videos werden über den Prozessor umgewandelt (AMD-Besc
 | 7 | ✓ Altes Immich-Konto deiner Frau gelöscht | erledigt | – | – |
 | 8 | ✓ **Home Assistant** unter `www.florian.lv` (Geräte einbinden läuft) | erledigt | – | – |
 | 9 | ✓ **Vaultwarden** unter `www.wuerminghausen.wf` eingerichtet (Konten angelegt, Registrierung zu). **Nutzung und 1Password-Umzug** erst nach einigen Wochen stabilem Backup | eingerichtet | Master-Passwort und 2FA-Wiederherstellungscode sicher verwahrt | ~30 Min. für den Umzug |
-| 10 | **Homepage** (README Schritt 11) | zuletzt | alle anderen Dienste installiert | ~15 Min. |
+| 10 | ✓ **Homepage** mit Container-Status, Drucker-Kachel und **Portainer** (Neustart-Knopf) | erledigt | – | – |
+| 12 | **Landingpages und halvern-industries.com** auf dem VPS (vorbereitet in einer anderen Sitzung: `Caddyfile.master`, Platzhalterseiten, `deploy.sh`) – siehe unten | offen | DNS-Einträge bei den Registraren | ~1 Std. |
+| 13 | **Alexa**: Alexa Media Player (Echos steuern) und Emulated Hue (Sprachsteuerung) | offen | 2FA-App-Schlüssel von Amazon | ~30 Min. |
+| 14 | **ESP32 als Bluetooth-Proxy** für die Hue-Lampe, sobald sie umzieht | Board bestellt | – | ~15 Min. |
 | 11 | **MEGA kündigen**, Google Fotos/iCloud aufräumen | nach einigen Wochen Parallelbetrieb | Backups laufen nachweislich | – |
 
 Während der großen Importe (5, 6) den Arbeitsspeicher mit `free -h` beobachten. Steigt der Swap dauerhaft über
@@ -65,3 +68,28 @@ Ports im Tunnel: Fotos 2283 · Cloud 9200 · Dokumente 8000 · Rezepte 9925 · P
 
 **Bei Diensten mit Erst-Einrichtung im Browser** (Mealie, Home Assistant, Vaultwarden) gilt: erst im Heimnetz
 absichern bzw. Konten anlegen, **danach** den Caddy-Eintrag ergänzen.
+
+## Weitere Websites auf dem VPS (Landingpages, halvern-industries.com)
+
+Statische Seiten, die Caddy direkt aus `/var/www/<domain>/` ausliefert – unabhängig vom Heimserver.
+
+| Domain | Registrar | Inhalt |
+|---|---|---|
+| `halvern-industries.com` | IONOS | eigene Website (Python-Build → `public/`, eigenes `deploy/deploy.sh`) |
+| `florian.pw` | Unstoppable | Platzhalter – nur möglich, wenn dort klassisches DNS (A-Eintrag) angeboten wird |
+| `sophia.lv`, `hannah.ee` | Regery | Platzhalter |
+| `karl.je` | Nicnames | Platzhalter |
+| `schillerhoehe.net` | Checkdomains | Platzhalter |
+| `friedrich-schiller-höhe.de` | Checkdomains | Weiterleitung auf `schillerhoehe.net` (im Caddyfile als `xn--friedrich-schiller-hhe-eic.de`) |
+
+Pro Domain bei der jeweiligen Registrar A-Einträge `@` und `www` → `217.154.115.102`.
+
+**Wichtig vor dem Austausch der Caddyfile:** Die neue Gesamt-Caddyfile muss **alle** Heimserver-Blöcke enthalten
+(Vorlage: `vps/Caddyfile.heimserver` – Fotos, Cloud, Dokumente, Rezepte, Passwörter, Smart Home). Nie ungeprüft
+überschreiben, sondern auf dem VPS:
+
+```bash
+cd ~/bildsynchronisation/vps && git pull
+sudo ./caddy-check.sh /root/Caddyfile.master              # meldet fehlende Domains, prüft die Syntax
+sudo ./caddy-check.sh /root/Caddyfile.master übernehmen   # erst wenn alles passt: sichern, einspielen, neu laden
+```

@@ -1,0 +1,53 @@
+# Heimserver-Dienste im Caddyfile des VPS (/etc/caddy/Caddyfile).
+# Diese Blöcke MÜSSEN in jeder neuen Gesamt-Caddyfile enthalten sein – fehlt einer, ist der Dienst
+# von außen nicht mehr erreichbar (Handy-Backup, Bitwarden-Apps, Home-Assistant-App …).
+# Prüfen vor dem Austausch:  sudo ./caddy-check.sh <neue Caddyfile>
+
+# --- Fotos: Immich ---
+www.wuerminghausen.org {
+	encode zstd gzip
+	reverse_proxy 10.77.0.2:2283
+}
+wuerminghausen.org {
+	redir https://www.wuerminghausen.org{uri} permanent
+}
+
+# --- Cloud: OpenCloud ---
+www.wuerminghausen.net {
+	reverse_proxy 10.77.0.2:9200
+}
+wuerminghausen.net {
+	redir https://www.wuerminghausen.net{uri} permanent
+}
+
+# --- Dokumente: Paperless-ngx ---
+www.wuerminghausen.eu {
+	reverse_proxy 10.77.0.2:8000
+}
+wuerminghausen.eu {
+	redir https://www.wuerminghausen.eu{uri} permanent
+}
+
+# --- Rezepte: Mealie ---
+www.wuerminghausen.si {
+	reverse_proxy 10.77.0.2:9925
+}
+wuerminghausen.si {
+	redir https://www.wuerminghausen.si{uri} permanent
+}
+
+# --- Passwörter: Vaultwarden ---
+www.wuerminghausen.wf {
+	reverse_proxy 10.77.0.2:8222
+}
+wuerminghausen.wf {
+	redir https://www.wuerminghausen.wf{uri} permanent
+}
+
+# --- Smart Home: Home Assistant ---
+www.florian.lv {
+	reverse_proxy 10.77.0.2:8123
+}
+florian.lv {
+	redir https://www.florian.lv{uri} permanent
+}
