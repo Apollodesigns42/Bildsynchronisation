@@ -379,7 +379,7 @@ cd bildsynchronisation/heimserver/verwaltung
 ```
 
 Danach **innerhalb von 5 Minuten** `https://<IP des Mini-PCs>:9443` öffnen und das Admin-Konto mit einem starken
-Passwort anlegen (sonst sperrt sich Portainer: `docker restart portainer`). Die Zertifikatswarnung des Browsers
+Passwort anlegen. Den abgefragten *Setup token* zeigt install.sh an (später: `docker logs portainer 2>&1 | grep -i token`). Sonst sperrt sich Portainer: `docker restart portainer`. Die Zertifikatswarnung des Browsers
 ist hier normal. Anschließend *Get Started* → *local* → *Containers*: Haken beim Dienst setzen → **Restart**.
 
 Wer in Portainer angemeldet ist, kann den ganzen Server steuern – deshalb nie über die Domain freigeben.

@@ -26,5 +26,8 @@ echo
 echo "Portainer: https://${PORTAINER_IP}:9443  (nur im Heimnetz)"
 echo "JETZT innerhalb von 5 Minuten öffnen und das Admin-Konto anlegen – sonst sperrt sich"
 echo "Portainer aus Sicherheitsgründen (dann: docker restart portainer)."
+sleep 5
+echo "Setup-Token (wird beim Anlegen des Kontos abgefragt):"
+docker logs portainer 2>&1 | grep -i token | tail -n 2 || echo "  noch nicht da – später: docker logs portainer 2>&1 | grep -i token"
 echo "Die Zertifikatswarnung des Browsers ist hier normal (eigenes Zertifikat im Heimnetz)."
 echo "Danach in startseite/: ./install.sh neu  – dann erscheint die Kachel „Container“."
