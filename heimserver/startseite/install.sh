@@ -95,8 +95,16 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
       echo "        server: heimserver"
       echo "        container: homeassistant"
     fi
-    if [[ -f ../adguard/.env || -f ../verwaltung/.env ]]; then
+    printer=$(val dokumente SCANNER_URL)
+    if [[ -f ../adguard/.env || -f ../verwaltung/.env || -n "$printer" ]]; then
       echo "- Verwaltung:"
+    fi
+    if [[ -n "$printer" ]]; then
+      echo "    - Drucker:"
+      echo "        icon: mdi-printer"
+      echo "        href: $printer"
+      echo "        description: Tonerstand & Einstellungen"
+      echo "        siteMonitor: $printer"
     fi
     if [[ -f ../verwaltung/.env ]]; then
       echo "    - Container:"
