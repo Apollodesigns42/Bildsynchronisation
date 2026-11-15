@@ -96,9 +96,6 @@ halvern-industries.com {
 		}
 	}
 
-	log {
-		output file /var/log/caddy/halvern-industries.log
-	}
 }
 www.halvern-industries.com {
 	redir https://halvern-industries.com{uri} permanent
