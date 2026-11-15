@@ -16,7 +16,7 @@ fehlt=$(comm -23 <(hosts "$alt") <(hosts "$neu") || true)
 if [[ -n "$fehlt" ]]; then
   echo "ACHTUNG – diese Domains laufen jetzt, fehlen aber in $neu:"
   echo "$fehlt" | sed 's/^/  - /'
-  echo "Nicht übernehmen, erst ergänzen (Vorlage mit allen Diensten: vps/Caddyfile)."
+  echo "Nicht übernehmen, erst ergänzen (Vorlage mit allen Diensten: vps/Caddyfile.vps)."
   exit 1
 fi
 echo "Alle bisherigen Domains sind enthalten. Neu hinzu kommen:"

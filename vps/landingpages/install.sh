@@ -25,4 +25,4 @@ mkdir -p /var/www/halvern-industries.com
 mkdir -p /var/log/caddy
 chown caddy:caddy /var/log/caddy 2>/dev/null || true
 chmod -R a+rX /var/www
-echo "Fertig. Danach: sudo vps/caddy-check.sh vps/Caddyfile übernehmen"
+echo "Fertig. Danach: sudo vps/caddy-check.sh vps/Caddyfile.vps übernehmen"

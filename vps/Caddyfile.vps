@@ -1,0 +1,138 @@
+# Gesamt-Caddyfile des IONOS-VPS – gehört nach /etc/caddy/Caddyfile.
+# Einspielen NIE direkt, sondern geprüft (meldet fehlende Domains, prüft die Syntax, legt eine Sicherung an):
+#   sudo vps/caddy-check.sh vps/Caddyfile.vps übernehmen
+# Caddy holt für jede Domain automatisch ein HTTPS-Zertifikat. Voraussetzung: A-Einträge "@" und "www"
+# der jeweiligen Domain zeigen auf 217.154.115.102.
+
+# Gemeinsame Einstellungen für statische Websites
+(statisch) {
+	encode zstd gzip
+	file_server
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
+
+# ===================================================================================
+# Burgenkampf (Online-Spielserver, läuft lokal auf dem VPS)
+# ===================================================================================
+burgenkampf.app {
+	reverse_proxy localhost:8571
+}
+
+# ===================================================================================
+# Heimserver – über den WireGuard-Tunnel zum NUC (10.77.0.2)
+# ===================================================================================
+
+# --- Fotos: Immich (Uploads unbegrenzt, WebSockets laufen automatisch durch) ---
+www.wuerminghausen.org {
+	encode zstd gzip
+	reverse_proxy 10.77.0.2:2283
+}
+wuerminghausen.org {
+	redir https://www.wuerminghausen.org{uri} permanent
+}
+
+# --- Cloud: OpenCloud ---
+www.wuerminghausen.net {
+	reverse_proxy 10.77.0.2:9200
+}
+wuerminghausen.net {
+	redir https://www.wuerminghausen.net{uri} permanent
+}
+
+# --- Dokumente: Paperless-ngx ---
+www.wuerminghausen.eu {
+	reverse_proxy 10.77.0.2:8000
+}
+wuerminghausen.eu {
+	redir https://www.wuerminghausen.eu{uri} permanent
+}
+
+# --- Rezepte: Mealie ---
+www.wuerminghausen.si {
+	reverse_proxy 10.77.0.2:9925
+}
+wuerminghausen.si {
+	redir https://www.wuerminghausen.si{uri} permanent
+}
+
+# --- Passwörter: Vaultwarden ---
+www.wuerminghausen.wf {
+	reverse_proxy 10.77.0.2:8222
+}
+wuerminghausen.wf {
+	redir https://www.wuerminghausen.wf{uri} permanent
+}
+
+# --- Smart Home: Home Assistant ---
+www.florian.lv {
+	reverse_proxy 10.77.0.2:8123
+}
+florian.lv {
+	redir https://www.florian.lv{uri} permanent
+}
+
+# ===================================================================================
+# halvern-industries.com – statische Website aus /var/www/halvern-industries.com
+# ===================================================================================
+halvern-industries.com {
+	root * /var/www/halvern-industries.com
+	import statisch
+
+	# Bilder, Schriften, CSS/JS eine Woche im Browser zwischenspeichern
+	@assets path *.css *.js *.png *.jpg *.jpeg *.webp *.avif *.svg *.ico *.woff *.woff2
+	header @assets Cache-Control "public, max-age=604800"
+
+	# Eigene Fehlerseite, falls die Website eine 404.html mitbringt
+	handle_errors {
+		@notfound expression {err.status_code} == 404
+		handle @notfound {
+			rewrite * /404.html
+			file_server
+		}
+	}
+
+	log {
+		output file /var/log/caddy/halvern-industries.log
+	}
+}
+www.halvern-industries.com {
+	redir https://halvern-industries.com{uri} permanent
+}
+
+# ===================================================================================
+# Landingpages – Platzhalter aus /var/www/<domain> (erzeugt von vps/landingpages/install.sh)
+# ===================================================================================
+florian.pw, www.florian.pw {
+	root * /var/www/florian.pw
+	import statisch
+}
+
+sophia.lv, www.sophia.lv {
+	root * /var/www/sophia.lv
+	import statisch
+}
+
+hannah.ee, www.hannah.ee {
+	root * /var/www/hannah.ee
+	import statisch
+}
+
+karl.je, www.karl.je {
+	root * /var/www/karl.je
+	import statisch
+}
+
+schillerhoehe.net, www.schillerhoehe.net {
+	root * /var/www/schillerhoehe.net
+	import statisch
+}
+
+# friedrich-schiller-höhe.de (Umlaut-Domain in Punycode-Schreibweise) leitet auf schillerhoehe.net um
+xn--friedrich-schiller-hhe-eic.de, www.xn--friedrich-schiller-hhe-eic.de {
+	redir https://schillerhoehe.net{uri} permanent
+}
