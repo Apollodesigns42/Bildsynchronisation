@@ -25,8 +25,16 @@ comm -13 <(hosts "$alt") <(hosts "$neu") | sed 's/^/  + /' || true
 caddy validate --adapter caddyfile --config "$neu"
 
 if [[ ${2:-} == übernehmen ]]; then
-  cp "$alt" "$alt.bak-$(date +%Y%m%d-%H%M%S)"
+  bak="$alt.bak-$(date +%Y%m%d-%H%M%S)"
+  cp "$alt" "$bak"
   cp "$neu" "$alt"
-  systemctl reload caddy
-  echo "Übernommen und neu geladen. Alte Fassung liegt daneben als $alt.bak-…"
+  if systemctl reload caddy; then
+    echo "Übernommen und neu geladen. Alte Fassung: $bak"
+  else
+    # Neu laden fehlgeschlagen: alte Fassung zurück, damit ein späterer Neustart nichts kaputtmacht
+    cp "$bak" "$alt"
+    echo "Neu laden fehlgeschlagen – alte Caddyfile wiederhergestellt, Caddy läuft unverändert weiter."
+    echo "Ursache: journalctl -u caddy -n 30 --no-pager"
+    exit 1
+  fi
 fi
