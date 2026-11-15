@@ -18,7 +18,7 @@ täglicher Check laufen. Videos werden über den Prozessor umgewandelt (AMD-Besc
 | 8 | ✓ **Home Assistant** unter `www.florian.lv` (Geräte einbinden läuft) | erledigt | – | – |
 | 9 | ✓ **Vaultwarden** unter `www.wuerminghausen.wf` eingerichtet (Konten angelegt, Registrierung zu). **Nutzung und 1Password-Umzug** erst nach einigen Wochen stabilem Backup | eingerichtet | Master-Passwort und 2FA-Wiederherstellungscode sicher verwahrt | ~30 Min. für den Umzug |
 | 10 | ✓ **Homepage** mit Container-Status, Drucker-Kachel und **Portainer** (Neustart-Knopf) | erledigt | – | – |
-| 12 | **Landingpages und halvern-industries.com** auf dem VPS (`vps/Caddyfile.vps`, `vps/landingpages/`) – siehe unten | offen | DNS-Einträge bei den Registraren | ~1 Std. |
+| 12 | ✓ **Landingpages** live (Caddyfile.vps eingespielt). Offen: **halvern-industries.com** per `deploy.sh` vom PC hochladen, neue Seiten in Uptime Kuma aufnehmen | teilweise erledigt | – | ~15 Min. |
 | 13 | **Alexa**: Alexa Media Player (Echos steuern) und Emulated Hue (Sprachsteuerung) | offen | 2FA-App-Schlüssel von Amazon | ~30 Min. |
 | 14 | **ESP32 als Bluetooth-Proxy** für die Hue-Lampe, sobald sie umzieht | Board bestellt | – | ~15 Min. |
 | 11 | **MEGA kündigen**, Google Fotos/iCloud aufräumen | nach einigen Wochen Parallelbetrieb | Backups laufen nachweislich | – |
