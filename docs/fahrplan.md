@@ -98,3 +98,14 @@ sudo vps/caddy-check.sh vps/Caddyfile.vps übernehmen    # erst wenn alles passt
 
 halvern-industries.com: Die Website mit ihrem eigenen `deploy.sh` nach `/var/www/halvern-industries.com/`
 hochladen – die Caddy-Schritte aus deren `DEPLOY.md` entfallen (der Block steht schon in `vps/Caddyfile.vps`).
+
+### Protokoll-Aufbewahrung auf dem VPS (Datenschutzerklärung halvern-industries.com)
+
+Die Datenschutzerklärung sagt zu: Fehlermeldungen des Webservers (können IP-Adressen enthalten) werden nach
+spätestens 14 Tagen gelöscht. Einmalig auf dem VPS einrichten:
+
+```bash
+mkdir -p /etc/systemd/journald.conf.d
+printf '[Journal]\nMaxRetentionSec=14day\n' > /etc/systemd/journald.conf.d/aufbewahrung.conf
+systemctl restart systemd-journald
+```
