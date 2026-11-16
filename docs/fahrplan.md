@@ -20,7 +20,8 @@ täglicher Check laufen. Videos werden über den Prozessor umgewandelt (AMD-Besc
 | 10 | ✓ **Homepage** mit Container-Status, Drucker-Kachel und **Portainer** (Neustart-Knopf) | erledigt | – | – |
 | 12 | ✓ **Landingpages** live (Caddyfile.vps eingespielt). Offen: **halvern-industries.com** per `deploy.sh` vom PC hochladen, neue Seiten in Uptime Kuma aufnehmen | teilweise erledigt | – | ~15 Min. |
 | 13 | **Alexa**: Alexa Media Player (Echos steuern) und Emulated Hue (Sprachsteuerung) | offen | 2FA-App-Schlüssel von Amazon | ~30 Min. |
-| 14 | **ESP32 als Bluetooth-Proxy** für die Hue-Lampe, sobald sie umzieht | Board bestellt | – | ~15 Min. |
+| 14 | ✓ **ESP32 als Bluetooth-Proxy** aufgespielt – bei Umzug der Hue-Lampe nur neben die Lampe stecken | erledigt | – | – |
+| 15 | **VPS auf Ubuntu 26.04** heben (`do-release-upgrade`) – kein Muss, 24.04 hat Updates bis 2029 | irgendwann in Ruhe | vorher Snapshot bei IONOS anlegen | ~1 Std. |
 | 11 | **MEGA kündigen**, Google Fotos/iCloud aufräumen | nach einigen Wochen Parallelbetrieb | Backups laufen nachweislich | – |
 
 Während der großen Importe (5, 6) den Arbeitsspeicher mit `free -h` beobachten. Steigt der Swap dauerhaft über
