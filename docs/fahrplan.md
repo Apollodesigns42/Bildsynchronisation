@@ -18,7 +18,7 @@ täglicher Check laufen. Videos werden über den Prozessor umgewandelt (AMD-Besc
 | 8 | ✓ **Home Assistant** unter `www.florian.lv` (Geräte einbinden läuft) | erledigt | – | – |
 | 9 | ✓ **Vaultwarden** unter `www.wuerminghausen.wf` eingerichtet (Konten angelegt, Registrierung zu). **Nutzung und 1Password-Umzug** erst nach einigen Wochen stabilem Backup | eingerichtet | Master-Passwort und 2FA-Wiederherstellungscode sicher verwahrt | ~30 Min. für den Umzug |
 | 10 | ✓ **Homepage** mit Container-Status, Drucker-Kachel und **Portainer** (Neustart-Knopf) | erledigt | – | – |
-| 12 | ✓ **Landingpages** live (Caddyfile.vps eingespielt). Offen: **halvern-industries.com** per `deploy.sh` vom PC hochladen, neue Seiten in Uptime Kuma aufnehmen | teilweise erledigt | – | ~15 Min. |
+| 12 | ✓ **Landingpages** und **halvern-industries.com** live (Impressum, Datenschutz, AVV mit IONOS, Protokolle 14 Tage). Offen: neue Seiten in Uptime Kuma aufnehmen; vor Shop-Start AGB/Widerruf/Versand und USt-Hinweis klären | erledigt bis auf Uptime Kuma | – | ~10 Min. |
 | 13 | **Alexa**: Alexa Media Player (Echos steuern) und Emulated Hue (Sprachsteuerung) | offen | 2FA-App-Schlüssel von Amazon | ~30 Min. |
 | 14 | ✓ **ESP32 als Bluetooth-Proxy** aufgespielt – bei Umzug der Hue-Lampe nur neben die Lampe stecken | erledigt | – | – |
 | 15 | **VPS auf Ubuntu 26.04** heben (`do-release-upgrade`) – kein Muss, 24.04 hat Updates bis 2029 | irgendwann in Ruhe | vorher Snapshot bei IONOS anlegen | ~1 Std. |
