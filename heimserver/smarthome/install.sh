@@ -14,8 +14,9 @@ else
 fi
 set -a; source .env; set +a
 
-# Grundkonfiguration: entspricht der Standardkonfiguration von Home Assistant, ergänzt um
-# den Reverse Proxy auf dem VPS (sonst lehnt Home Assistant weitergeleitete Anfragen ab).
+# Grundkonfiguration: entspricht der Standardkonfiguration von Home Assistant. Den Reverse Proxy auf
+# dem VPS (10.77.0.1) trägt man seit Home Assistant 2026 in der Oberfläche ein, nicht mehr hier
+# (Einstellungen → System → Netzwerk) – siehe Hinweis am Ende.
 mkdir -p config/themes
 if [[ ! -f config/configuration.yaml ]]; then
   cat > config/configuration.yaml <<'CONF'
@@ -28,12 +29,6 @@ frontend:
 automation: !include automations.yaml
 script: !include scripts.yaml
 scene: !include scenes.yaml
-
-# Zugriff über den VPS (WireGuard-Tunnel) erlauben
-http:
-  use_x_forwarded_for: true
-  trusted_proxies:
-    - 10.77.0.1
 CONF
   touch config/automations.yaml config/scripts.yaml config/scenes.yaml
 fi
@@ -57,3 +52,7 @@ echo
 echo "Home Assistant startet (beim ersten Mal 1–3 Minuten)."
 echo "Einrichtung im Heimnetz: http://${ip:-<IP des Mini-PCs>}:8123  – dort sofort das Konto anlegen,"
 echo "ERST DANACH die Domain ${HA_DOMAIN:-(keine)} auf dem VPS freischalten."
+if [[ -n "${HA_DOMAIN}" ]]; then
+  echo "Für den Zugriff über die Domain: Einstellungen → System → Netzwerk → Reverse Proxy:"
+  echo "  weitergeleitete Header (X-Forwarded-For) erlauben, vertrauenswürdiger Proxy: 10.77.0.1"
+fi

@@ -343,8 +343,9 @@ cd bildsynchronisation/heimserver/smarthome
 1. Im Heimnetz `http://<IP des Mini-PCs>:8123` öffnen und **sofort das Konto anlegen** (die Startseite ist bis dahin
    offen). Standort, Einheiten und Sprache einstellen.
 2. **Erst danach** – falls gewünscht – die Domain freischalten: DNS auf den VPS, im Caddyfile
-   `reverse_proxy 10.77.0.2:8123`. Mit Domain hat `install.sh` den Tunnel bereits für Port 8123 geöffnet und die
-   nötige Proxy-Einstellung in `config/configuration.yaml` hinterlegt.
+   `reverse_proxy 10.77.0.2:8123`. Mit Domain hat `install.sh` den Tunnel bereits für Port 8123 geöffnet. In
+   Home Assistant unter *Einstellungen → System → Netzwerk* den Reverse Proxy erlauben (weitergeleitete Header,
+   vertrauenswürdiger Proxy `10.77.0.1`) – seit Home Assistant 2026 dort statt in `configuration.yaml`.
 3. Geräte unter *Einstellungen → Geräte & Dienste* hinzufügen. Viele werden automatisch gefunden.
 4. Auf dem Handy die App **„Home Assistant“** installieren (Server-URL: die Domain bzw. im Heimnetz die IP).
    Darüber erkennt Home Assistant auch, wer zu Hause ist.
