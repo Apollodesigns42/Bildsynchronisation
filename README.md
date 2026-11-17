@@ -607,6 +607,12 @@ sudo bash -c 'set -a; source backup.env; restic mount /mnt/restore'            #
 Für eine komplette Wiederherstellung von Immich siehe [Immich-Doku „Backup and Restore“](https://docs.immich.app/administration/backup-and-restore).
 Der Datenbank-Dump liegt im Backup unter `backups/manual-*.sql.gz`.
 
+**Zusätzlicher Schutz: Snapshots der Storage Box.** In der Hetzner-Konsole bei der Storage Box unter *Snapshots*
+automatische Snapshots aktivieren (eingerichtet: täglich 06:00 UTC, 10 Stück). Hetzner legt sie selbst an; vom
+Mini-PC aus lassen sie sich weder ändern noch löschen – Schutz, falls der Mini-PC kompromittiert wird oder das
+restic-Repository versehentlich gelöscht wird. Zurücksetzen auf einen Snapshot löscht alle neueren Stände und ist
+nur für diesen Notfall gedacht; einzelne Dateien stellt man wie gewohnt mit restic wieder her.
+
 ## Überwachung per E-Mail
 
 `heimserver/check.sh` prüft jeden Morgen den Mini-PC und schickt dir **nur bei Problemen** eine E-Mail:
