@@ -698,7 +698,8 @@ printf 'Unattended-Upgrade::Automatic-Reboot "true";\nUnattended-Upgrade::Automa
 ### Täglicher Check auf dem VPS
 
 `vps/check.sh` prüft auf dem VPS Speicher, Arbeitsspeicher, Caddy, Burgenkampf, Uptime Kuma, den Tunnel und die
-automatischen Sicherheitsupdates und schickt nur bei Problemen eine Mail (montags zusätzlich „alles ok“):
+automatischen Sicherheitsupdates und meldet sich nur bei Problemen (montags zusätzlich „alles ok“) – per
+**ntfy-Push** (`NTFY_URL`, eingerichtet) und/oder Mail. GMX lehnt Anmeldungen vom VPS ab, daher dort nur ntfy:
 
 ```bash
 cd /opt/bildsynchronisation/vps
