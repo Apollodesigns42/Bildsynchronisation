@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Gesundheits-Check für den Heimserver. Schickt eine E-Mail, wenn etwas nicht stimmt.
-# Prüft: SSDs (SMART), letztes Backup, Speicherplatz, Docker-Container, WireGuard-Tunnel,
+# Prüft: SSDs und Festplatten (SMART), letztes Backup, Speicherplatz, Docker-Container, WireGuard-Tunnel,
 # Werbefilter (FritzBox → AdGuard) und ob die Dienste aus dem Internet erreichbar sind. Als root ausführen.
 #
 # Verwendung:  sudo ./check.sh          # prüfen, bei Problemen Mail senden (täglich per cron)
@@ -48,29 +48,38 @@ if [[ $mode == test ]]; then
   exit 0
 fi
 
-# --- 1. SSDs (SMART) -------------------------------------------------------------
+# --- 1. Datenträger (SMART) ------------------------------------------------------
+# --scan-open erkennt SATA-Platten korrekt als "sat" (mit --scan wären es "scsi" ohne SMART-Werte).
 if command -v smartctl >/dev/null 2>&1; then
   while read -r dev _ type _; do
-    [[ -n "$dev" ]] || continue
+    [[ -n "$dev" && "$dev" != \#* ]] || continue
     out=$(smartctl -H -A -d "$type" "$dev" 2>&1); rc=$?
-    model=$(smartctl -i -d "$type" "$dev" 2>/dev/null | awk -F: '/Model Number|Device Model/ {gsub(/^ +/,"",$2); print $2; exit}')
+    ident=$(smartctl -i -d "$type" "$dev" 2>/dev/null)
+    model=$(awk -F: '/Model Number|Device Model|Product:/ {gsub(/^ +/,"",$2); print $2; exit}' <<<"$ident")
+    rpm=$(awk -F: '/Rotation Rate/ {gsub(/^ +/,"",$2); print $2; exit}' <<<"$ident")
+    if [[ -n "$rpm" && "$rpm" != *Solid* ]]; then kind="Festplatte"; else kind="SSD"; fi
     name="$dev${model:+ ($model)}"
     before=${#problems[@]}
     # Exit-Code-Bits von smartctl: 8 = Platte meldet Ausfall, 16 = Grenzwert unterschritten
     if (( rc & 8 )) || (( rc & 16 )) || grep -qiE 'result: FAILED|FAILING_NOW' <<<"$out"; then
-      problem "SSD $name meldet einen drohenden Ausfall! Daten sichern und SSD tauschen."
+      problem "$kind $name meldet einen drohenden Ausfall! Daten sichern und $kind tauschen."
     fi
     # Wichtige Einzelwerte
     realloc=$(awk '$2 ~ /^(Reallocated_Sector_Ct|Reallocated_Event_Count)$/ {s+=$10} END {print s+0}' <<<"$out")
     pending=$(awk '$2 ~ /^(Current_Pending_Sector|Offline_Uncorrectable)$/ {s+=$10} END {print s+0}' <<<"$out")
     used=$(awk -F: '/Percentage Used/ {gsub(/[ %]/,"",$2); print $2}' <<<"$out")
     media=$(awk -F: '/Media and Data Integrity Errors/ {gsub(/[ ,]/,"",$2); print $2}' <<<"$out")
-    (( realloc > 0 )) && problem "SSD $name: $realloc ersetzte Sektoren – Zustand beobachten."
-    (( pending > 0 )) && problem "SSD $name: $pending nicht lesbare Sektoren."
-    [[ -n "$used" ]] && (( used >= 80 )) && problem "SSD $name: zu $used % abgenutzt."
-    [[ -n "$media" ]] && (( media > 0 )) && problem "SSD $name: $media Datenfehler."
-    (( ${#problems[@]} == before )) && info "SSD $name: ok${used:+, $used % abgenutzt}"
-  done < <(smartctl --scan)
+    hours=$(awk '$2 == "Power_On_Hours" {print $10+0; exit} /Power On Hours/ {gsub(/[^0-9]/,"",$0); print $0+0; exit}' <<<"$out")
+    (( realloc > 0 )) && problem "$kind $name: $realloc ersetzte Sektoren – Zustand beobachten."
+    (( pending > 0 )) && problem "$kind $name: $pending nicht lesbare Sektoren."
+    [[ -n "$used" ]] && (( used >= 80 )) && problem "$kind $name: zu $used % abgenutzt."
+    [[ -n "$media" ]] && (( media > 0 )) && problem "$kind $name: $media Datenfehler."
+    detail=""
+    [[ -n "$used" ]] && detail+=", $used % abgenutzt"
+    [[ "$kind" == Festplatte ]] && grep -q Reallocated_Sector_Ct <<<"$out" && detail+=", keine defekten Sektoren"
+    [[ -n "$hours" ]] && (( hours > 0 )) && detail+=", $(( hours / 24 )) Tage in Betrieb"
+    (( ${#problems[@]} == before )) && info "$kind $name: ok$detail"
+  done < <(smartctl --scan-open)
 else
   problem "smartmontools fehlt – SSDs werden nicht geprüft (sudo apt install smartmontools)."
 fi
