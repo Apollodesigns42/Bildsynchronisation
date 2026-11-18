@@ -670,8 +670,30 @@ cd bildsynchronisation/heimserver && ./update.sh
 Das aktualisiert Immich und OpenCloud. `IMMICH_VERSION=v3` bzw. `OC_VERSION=7` in den `.env`-Dateien aktualisieren
 automatisch innerhalb der jeweiligen Hauptversion. Vor einem Wechsel auf eine neue
 Hauptversion die [Release Notes](https://github.com/immich-app/immich/releases) lesen und vorher ein Backup machen.
-Das Betriebssystem hältst du mit `sudo apt update && sudo apt upgrade` aktuell. Für automatische
-Sicherheitsupdates `sudo apt install unattended-upgrades` auf Mini-PC und VPS.
+Das Betriebssystem hältst du mit `sudo apt update && sudo apt upgrade` aktuell.
+
+### Automatische Updates (Mini-PC)
+
+`auto-update.sh` spielt einmal pro Woche Ubuntu-Updates und Container-Updates (wie `update.sh`) ein und startet
+den Mini-PC neu, falls ein Update das verlangt – nie während eines Backups. Der tägliche Check meldet sich, wenn
+Updates länger als 10 Tage scheitern. Einrichten (`sudo crontab -e`, Mittwoch 5:30 Uhr):
+
+```
+30 5 * * 3 /home/<benutzer>/bildsynchronisation/heimserver/auto-update.sh >> /var/log/heimserver-update.log 2>&1
+```
+
+Gibt es später ein zweites Gerät mit AdGuard, dort einen **anderen Wochentag** wählen, damit nie beide gleichzeitig
+neu starten.
+
+### Automatische Updates (VPS)
+
+Sicherheitsupdates spielt Ubuntu dort mit `unattended-upgrades` selbst ein. Damit nötige Neustarts nachts von
+allein passieren:
+
+```bash
+printf 'Unattended-Upgrade::Automatic-Reboot "true";\nUnattended-Upgrade::Automatic-Reboot-Time "04:30";\n' \
+  > /etc/apt/apt.conf.d/52-neustart
+```
 
 ## Nützliche Befehle
 

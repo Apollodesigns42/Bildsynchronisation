@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Gesundheits-Check für den Heimserver. Schickt eine E-Mail, wenn etwas nicht stimmt.
-# Prüft: SSDs und Festplatten (SMART), letztes Backup, Speicherplatz, Docker-Container, WireGuard-Tunnel,
+# Prüft: SSDs und Festplatten (SMART, Temperatur), Prozessor-Temperatur, automatische Updates, letztes Backup, Speicherplatz, Docker-Container, WireGuard-Tunnel,
 # Werbefilter (FritzBox → AdGuard) und ob die Dienste aus dem Internet erreichbar sind. Als root ausführen.
 #
 # Verwendung:  sudo ./check.sh          # prüfen, bei Problemen Mail senden (täglich per cron)
@@ -70,6 +70,9 @@ if command -v smartctl >/dev/null 2>&1; then
     used=$(awk -F: '/Percentage Used/ {gsub(/[ %]/,"",$2); print $2}' <<<"$out")
     media=$(awk -F: '/Media and Data Integrity Errors/ {gsub(/[ ,]/,"",$2); print $2}' <<<"$out")
     hours=$(awk '$2 == "Power_On_Hours" {print $10+0; exit} /Power On Hours/ {gsub(/[^0-9]/,"",$0); print $0+0; exit}' <<<"$out")
+    temp=$(awk '$2 ~ /^(Temperature_Celsius|Airflow_Temperature_Cel)$/ {print $10+0; exit} /^Temperature:/ {print $2+0; exit}' <<<"$out")
+    if [[ "$kind" == Festplatte ]]; then tmax=${HDD_TEMP_WARN:-55}; else tmax=${SSD_TEMP_WARN:-70}; fi
+    [[ -n "$temp" ]] && (( temp >= tmax )) && problem "$kind $name ist $temp °C warm (Grenze $tmax °C) – Belüftung prüfen."
     (( realloc > 0 )) && problem "$kind $name: $realloc ersetzte Sektoren – Zustand beobachten."
     (( pending > 0 )) && problem "$kind $name: $pending nicht lesbare Sektoren."
     [[ -n "$used" ]] && (( used >= 80 )) && problem "$kind $name: zu $used % abgenutzt."
@@ -78,11 +81,43 @@ if command -v smartctl >/dev/null 2>&1; then
     [[ -n "$used" ]] && detail+=", $used % abgenutzt"
     [[ "$kind" == Festplatte ]] && grep -q Reallocated_Sector_Ct <<<"$out" && detail+=", keine defekten Sektoren"
     [[ -n "$hours" ]] && (( hours > 0 )) && detail+=", $(( hours / 24 )) Tage in Betrieb"
+    [[ -n "$temp" ]] && (( temp > 0 )) && detail+=", $temp °C"
     (( ${#problems[@]} == before )) && info "$kind $name: ok$detail"
   done < <(smartctl --scan-open)
 else
   problem "smartmontools fehlt – SSDs werden nicht geprüft (sudo apt install smartmontools)."
 fi
+
+# --- 1b. Prozessor-Temperatur ---------------------------------------------------------
+cpu_temp=""
+for h in /sys/class/hwmon/hwmon*; do
+  case $(cat "$h/name" 2>/dev/null) in coretemp|k10temp|zenpower)
+    cpu_temp=$(( $(cat "$h/temp1_input" 2>/dev/null || echo 0) / 1000 )); break ;;
+  esac
+done
+if [[ -z "$cpu_temp" || "$cpu_temp" == 0 ]]; then
+  for z in /sys/class/thermal/thermal_zone*; do
+    [[ $(cat "$z/type" 2>/dev/null) == x86_pkg_temp ]] && cpu_temp=$(( $(cat "$z/temp") / 1000 )) && break
+  done
+fi
+if [[ -n "$cpu_temp" && "$cpu_temp" != 0 ]]; then
+  if (( cpu_temp >= ${CPU_TEMP_WARN:-85} )); then
+    problem "Prozessor ist $cpu_temp °C warm (Grenze ${CPU_TEMP_WARN:-85} °C) – Lüftung/Staub prüfen."
+  else
+    info "Prozessor: $cpu_temp °C"
+  fi
+fi
+
+# --- 1c. Automatische Updates (auto-update.sh) ----------------------------------------
+if [[ -f /var/lib/heimserver/update-ok ]]; then
+  up_d=$(( ($(date +%s) - $(cat /var/lib/heimserver/update-ok)) / 86400 ))
+  if (( up_d > ${UPDATE_MAX_AGE_DAYS:-10} )); then
+    problem "Automatische Updates seit $up_d Tagen nicht erfolgreich – Log: /var/log/heimserver-update.log"
+  else
+    info "Updates: zuletzt vor $up_d Tagen erfolgreich"
+  fi
+fi
+[[ -f /var/run/reboot-required ]] && info "Neustart nach Updates ausstehend (erfolgt beim nächsten automatischen Update)"
 
 # --- 2. Letztes Backup -------------------------------------------------------------
 if [[ -f backup.env ]]; then
