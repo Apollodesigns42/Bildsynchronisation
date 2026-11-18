@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Gesundheits-Check für den VPS. Schickt eine E-Mail, wenn etwas nicht stimmt,
+# Gesundheits-Check für den VPS. Meldet sich per E-Mail und/oder ntfy-Push, wenn etwas nicht stimmt,
 # und am OK_MAIL_WEEKDAY eine „Alles ok“-Mail. Als root ausführen.
 # Prüft: Speicherplatz, Arbeitsspeicher, Caddy, Burgenkampf, Uptime Kuma, WireGuard-Tunnel,
 # automatische Sicherheitsupdates und ausstehende Neustarts.
@@ -41,9 +41,30 @@ send_mail() {  # $1 = Betreff, $2 = Text
   return $rc
 }
 
+# Push-Nachricht über ntfy (z.B. dasselbe Thema wie Uptime Kuma). $1 = Titel, $2 = Text, $3 = Priorität
+send_push() {
+  [[ -n "${NTFY_URL:-}" ]] || return 1
+  curl -sS -m 20 -H "Title: $1" -H "Priority: ${3:-default}" -H "Tags: computer" \
+       ${NTFY_TOKEN:+-H "Authorization: Bearer $NTFY_TOKEN"} -d "$2" "$NTFY_URL" >/dev/null
+}
+
+# Meldet über alle eingerichteten Wege (Mail und/oder ntfy)
+melden() {  # $1 = Titel, $2 = Text, $3 = ntfy-Priorität
+  local ok=1
+  if [[ -n "${SMTP_USER:-}" && "${SMTP_USER}" != name@example.de ]]; then send_mail "$1" "$2" && ok=0; fi
+  send_push "$1" "$2" "${3:-default}" && ok=0
+  return $ok
+}
+
 if [[ $mode == test ]]; then
-  send_mail "VPS: Test-Mail" "Der E-Mail-Versand von vps/check.sh funktioniert." \
-    && echo "Test-Mail an $MAIL_TO gesendet." || { echo "Versand fehlgeschlagen – SMTP-Daten in check.env prüfen."; exit 1; }
+  if [[ -n "${SMTP_USER:-}" && "${SMTP_USER}" != name@example.de ]]; then
+    send_mail "VPS: Test-Mail" "Der E-Mail-Versand von vps/check.sh funktioniert." \
+      && echo "Test-Mail an $MAIL_TO gesendet." || echo "Mail-Versand fehlgeschlagen – SMTP-Daten in check.env prüfen."
+  fi
+  if [[ -n "${NTFY_URL:-}" ]]; then
+    send_push "VPS: Test" "Push-Nachrichten von vps/check.sh funktionieren." \
+      && echo "Test-Push an $NTFY_URL gesendet." || echo "Push fehlgeschlagen – NTFY_URL prüfen."
+  fi
   exit 0
 fi
 
@@ -139,8 +160,8 @@ report+=$'\n'"Geprüft am $(TZ=Europe/Berlin date '+%d.%m.%Y %H:%M') auf $(hostn
 if [[ $mode == zeigen ]]; then
   echo "$report"
 elif (( ${#problems[@]} )); then
-  send_mail "VPS: ${#problems[@]} Problem(e)" "$report"
+  melden "VPS: ${#problems[@]} Problem(e)" "$report" high
 elif [[ -n "${OK_MAIL_WEEKDAY:-}" && $(date +%u) == "$OK_MAIL_WEEKDAY" ]]; then
-  send_mail "VPS: alles in Ordnung" "$report"
+  melden "VPS: alles in Ordnung" "$report" low
 fi
 (( ${#problems[@]} == 0 ))
