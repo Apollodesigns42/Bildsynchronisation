@@ -224,6 +224,8 @@ urls=()
 [[ -f passwoerter/.env ]] && urls+=("https://$(set -a; source passwoerter/.env; echo "$VAULTWARDEN_DOMAIN")/alive")
 ha_domain=$( [[ -f smarthome/.env ]] && (set -a; source smarthome/.env; echo "${HA_DOMAIN:-}") || true)
 [[ -z "$ha_domain" ]] || urls+=("https://$ha_domain/")
+# Weitere Seiten auf dem VPS (Burgenkampf, eigene Websites) – fällt der VPS samt Uptime Kuma aus, meldet es dieser Check
+for u in ${EXTRA_URLS:-}; do urls+=("$u"); done
 for u in "${urls[@]}"; do
   code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "$u")
   if [[ $code =~ ^[23] ]]; then

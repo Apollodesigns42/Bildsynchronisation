@@ -695,6 +695,18 @@ printf 'Unattended-Upgrade::Automatic-Reboot "true";\nUnattended-Upgrade::Automa
   > /etc/apt/apt.conf.d/52-neustart
 ```
 
+### Täglicher Check auf dem VPS
+
+`vps/check.sh` prüft auf dem VPS Speicher, Arbeitsspeicher, Caddy, Burgenkampf, Uptime Kuma, den Tunnel und die
+automatischen Sicherheitsupdates und schickt nur bei Problemen eine Mail (montags zusätzlich „alles ok“):
+
+```bash
+cd /opt/bildsynchronisation/vps
+cp check.env.example check.env && nano check.env     # Mail-Daten wie auf dem Mini-PC
+./check.sh test && ./check.sh zeigen
+(crontab -l; echo '15 7 * * * /opt/bildsynchronisation/vps/check.sh >> /var/log/vps-check.log 2>&1') | crontab -
+```
+
 ## Nützliche Befehle
 
 ```bash

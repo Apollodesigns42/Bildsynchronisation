@@ -11,6 +11,7 @@ heimserver/cloud/config/
 heimserver/cloud/daten/
 *.whl
 heimserver/check.env
+vps/check.env
 thumbs/
 heimserver/dokumente/db/
 heimserver/dokumente/data/
