@@ -208,7 +208,8 @@ if [[ -f adguard/.env ]]; then
   if [[ -z "$normal" ]]; then
     problem "DNS im Heimnetz gestört: Selbst $control_domain lässt sich nicht auflösen."
   elif [[ -n "$ad" && "$ad" != "0.0.0.0" ]]; then
-    problem "Werbefilter ist aus: Die FritzBox nutzt nicht AdGuard (vermutlich auf dem alternativen DNS-Server hängen geblieben). Abhilfe: FritzBox neu starten; danach im Online-Monitor prüfen, dass ein AdGuard-Server „aktuell genutzt“ wird."
+    msg="Werbefilter ist aus: Die FritzBox nutzt nicht AdGuard (vermutlich auf dem alternativen DNS-Server hängen geblieben). Abhilfe: FritzBox neu starten; danach im Online-Monitor prüfen, dass ein AdGuard-Server „aktuell genutzt“ wird."
+    if [[ ${ADGUARD_FILTER_WARN:-1} == 1 ]]; then problem "$msg"; else info "Werbefilter: aus (FritzBox nutzt den alternativen DNS-Server)"; fi
   else
     info "Werbefilter: aktiv (FritzBox leitet an AdGuard weiter)"
   fi
