@@ -96,9 +96,7 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
       echo "        container: homeassistant"
     fi
     printer=$(val dokumente SCANNER_URL)
-    if [[ -f ../adguard/.env || -f ../verwaltung/.env || -n "$printer" ]]; then
-      echo "- Verwaltung:"
-    fi
+    echo "- Verwaltung:"
     if [[ -n "$printer" ]]; then
       echo "    - Drucker:"
       echo "        icon: mdi-printer"
@@ -114,6 +112,20 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
       echo "        server: heimserver"
       echo "        container: portainer"
     fi
+    echo "    - Temperaturen:"
+    echo "        icon: mdi-thermometer"
+    echo "        description: Prozessor, SSD und Festplatte"
+    echo "        widget:"
+    echo "          type: customapi"
+    echo "          url: http://localhost:3000/status/temperaturen.json"
+    echo "          refreshInterval: 60000"
+    echo "          mappings:"
+    echo "            - field: cpu"
+    echo "              label: Prozessor"
+    echo "            - field: ssd"
+    echo "              label: SSD"
+    echo "            - field: festplatte"
+    echo "              label: Festplatte"
     if [[ -f ../adguard/.env ]]; then
       echo "    - Werbeblocker:"
       echo "        icon: mdi-shield-check"
@@ -174,7 +186,7 @@ sudo chown -R 1000:1000 config
 
 # Status-Datei für die Werbeblocker-Kachel vor dem Start anlegen (Homepage liefert nur Dateien aus,
 # die beim Start schon da sind; danach wird sie von werbefilter-status.sh laufend aktualisiert)
-[[ -f ../adguard/.env ]] && { sudo ../werbefilter-status.sh || true; }
+sudo ../werbefilter-status.sh || true
 docker compose pull
 docker compose up -d
 docker compose restart homepage >/dev/null   # neu erzeugte Liste laden
