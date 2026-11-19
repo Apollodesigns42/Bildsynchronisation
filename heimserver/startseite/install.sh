@@ -22,7 +22,7 @@ ip=$HOMEPAGE_IP
 echo 'net.ipv4.ip_nonlocal_bind = 1' | sudo tee /etc/sysctl.d/99-lan-bind.conf >/dev/null
 sudo sysctl -q --system
 
-mkdir -p config
+mkdir -p config status
 
 # Liest eine Variable aus der .env-Datei eines anderen Dienstes
 val() { [[ -f "../$1/.env" ]] && (set -a; source "../$1/.env"; echo "${!2:-}") || true; }
@@ -122,6 +122,15 @@ if [[ ! -f config/services.yaml || ${1:-} == neu ]]; then
       echo "        siteMonitor: http://$(val adguard ADGUARD_IP):3080"
       echo "        server: heimserver"
       echo "        container: adguard"
+      echo "        widget:"
+      echo "          type: customapi"
+      echo "          url: http://localhost:3000/status/werbefilter.json"
+      echo "          refreshInterval: 60000"
+      echo "          mappings:"
+      echo "            - field: filter"
+      echo "              label: Filter"
+      echo "            - field: geprueft"
+      echo "              label: Geprüft"
     fi
   } > config/services.yaml
   echo "Dienste-Liste erzeugt: config/services.yaml"
@@ -163,6 +172,9 @@ heimserver:
 CONF
 sudo chown -R 1000:1000 config
 
+# Status-Datei für die Werbeblocker-Kachel vor dem Start anlegen (Homepage liefert nur Dateien aus,
+# die beim Start schon da sind; danach wird sie von werbefilter-status.sh laufend aktualisiert)
+[[ -f ../adguard/.env ]] && { ../werbefilter-status.sh || true; }
 docker compose pull
 docker compose up -d
 docker compose restart homepage >/dev/null   # neu erzeugte Liste laden

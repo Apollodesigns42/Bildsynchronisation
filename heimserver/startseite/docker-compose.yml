@@ -18,6 +18,8 @@ services:
       # Systemplatte genügt – "/" im Container wäre Dockers eigenes Dateisystem.
       - /var/lib/heimserver:/mnt/system:ro
       - /mnt/daten:/mnt/daten:ro
+      # Status des Werbefilters (von werbefilter-status.sh geschrieben) für die Kachel „Werbeblocker“
+      - ./status:/app/public/status:ro
     environment:
       HOMEPAGE_ALLOWED_HOSTS: ${HOMEPAGE_IP}:3010
       PUID: '1000'

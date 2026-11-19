@@ -369,6 +369,13 @@ Danach `http://<IP des Mini-PCs>:3010` als Startseite im Browser festlegen. Komm
 
 **Am besten zuletzt installieren**, wenn alle anderen Dienste laufen – dann sind gleich alle auf der Startseite.
 
+**Werbefilter-Anzeige:** Die Kachel „Werbeblocker“ zeigt, ob die FritzBox gerade wirklich über AdGuard filtert
+(„aktiv“) oder auf den Ersatz-DNS ausgewichen ist. Dafür einmalig (`sudo crontab -e`):
+
+```
+*/5 * * * * /home/<benutzer>/bildsynchronisation/heimserver/werbefilter-status.sh
+```
+
 ### 11a. Container-Verwaltung (Portainer) einrichten (optional)
 
 Zeigt alle Dienste (Container) mit Status, Auslastung und Protokollen – und hat für jeden einen
