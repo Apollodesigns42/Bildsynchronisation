@@ -174,7 +174,7 @@ sudo chown -R 1000:1000 config
 
 # Status-Datei für die Werbeblocker-Kachel vor dem Start anlegen (Homepage liefert nur Dateien aus,
 # die beim Start schon da sind; danach wird sie von werbefilter-status.sh laufend aktualisiert)
-[[ -f ../adguard/.env ]] && { ../werbefilter-status.sh || true; }
+[[ -f ../adguard/.env ]] && { sudo ../werbefilter-status.sh || true; }
 docker compose pull
 docker compose up -d
 docker compose restart homepage >/dev/null   # neu erzeugte Liste laden
