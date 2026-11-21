@@ -95,8 +95,8 @@ halvern-industries.com {
 			file_server
 		}
 	}
-
 }
+
 www.halvern-industries.com {
 	redir https://halvern-industries.com{uri} permanent
 }
