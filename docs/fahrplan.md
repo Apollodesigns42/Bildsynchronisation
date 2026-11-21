@@ -107,6 +107,6 @@ spätestens 14 Tagen gelöscht. Einmalig auf dem VPS einrichten:
 
 ```bash
 mkdir -p /etc/systemd/journald.conf.d
-printf '[Journal]\nMaxRetentionSec=14day\n' > /etc/systemd/journald.conf.d/aufbewahrung.conf
+printf '[Journal]\nMaxRetentionSec=14day\nMaxFileSec=1day\n' > /etc/systemd/journald.conf.d/aufbewahrung.conf
 systemctl restart systemd-journald
 ```
