@@ -119,3 +119,6 @@ KVM-Konsole im IONOS-Kundenbereich.
 printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\nPermitRootLogin prohibit-password\n' > /etc/ssh/sshd_config.d/00-haerten.conf
 sshd -t && systemctl reload ssh
 ```
+
+Auf dem NUC genauso (erledigt), dort mit `PermitRootLogin no` und `sudo`. Notzugang: Bildschirm und Tastatur
+direkt am NUC.
