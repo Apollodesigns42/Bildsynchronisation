@@ -2,7 +2,7 @@
 # Spielt die Platzhalterseiten (index, Impressum, Datenschutz) aus seiten/<domain>/
 # nach /var/www/<domain>/ auf dem VPS. Vorhandene Dateien werden überschrieben,
 # die Seiten werden hier im Repository gepflegt.
-# friedrich-schiller-höhe.de hat keine eigene Seite: Caddy leitet sie auf schillerhoehe.net um.
+# friedrich-schiller-höhe.de liegt in Punycode-Schreibweise (xn--friedrich-schiller-hhe-eic.de).
 # Verwendung:  sudo vps/landingpages/install.sh
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -19,4 +19,4 @@ done
 # Zielordner für halvern-industries.com (Inhalt kommt per deploy.sh der Website)
 mkdir -p /var/www/halvern-industries.com
 chmod -R a+rX /var/www
-echo "Fertig. Caddy muss dafür nicht neu geladen werden."
+echo "Fertig. Neue Domain in vps/Caddyfile.vps? Dann: sudo vps/caddy-check.sh vps/Caddyfile.vps übernehmen"

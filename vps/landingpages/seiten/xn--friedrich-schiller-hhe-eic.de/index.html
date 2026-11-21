@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Friedrich-Schiller-Höhe Strausberg</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230E7490'/%3E%3C/svg%3E">
+<style>
+  :root { --c: #0E7490; --l: #5EEAD4; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: 'Inter','Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif;
+    color: #334155; background: #F8FAFC;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 2rem 1.25rem; overflow-x: hidden; position: relative;
+  }
+  .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: .35; z-index: 0; pointer-events: none; }
+  .b1 { width: 45vw; height: 45vw; background: var(--l); top: -15vw; left: -10vw; animation: float 14s ease-in-out infinite; }
+  .b2 { width: 35vw; height: 35vw; background: var(--c); bottom: -15vw; right: -8vw; opacity: .2; animation: float 18s ease-in-out infinite reverse; }
+  @keyframes float { 50% { transform: translate(3vw, 4vh) scale(1.08); } }
+  @media (prefers-reduced-motion: reduce) { .blob, .dot { animation: none; } }
+  main {
+    position: relative; z-index: 1;
+    background: rgba(255,255,255,.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.9); border-radius: 28px;
+    padding: clamp(2rem, 6vw, 4rem) clamp(1.5rem, 6vw, 4.5rem);
+    box-shadow: 0 20px 60px -20px rgba(15,23,42,.15);
+    width: 100%; max-width: 640px;
+  }
+  main.home { text-align: center; }
+  main.text { max-width: 760px; }
+  .logo { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto 2rem; }
+  .badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-size: .8rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--c); background: color-mix(in srgb, var(--c) 10%, white);
+    padding: .4rem .9rem; border-radius: 999px; margin-bottom: 1rem;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); animation: pulse 2s infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+  p, li { font-size: 1rem; line-height: 1.65; color: #475569; }
+  main.home p { font-size: 1.05rem; color: #64748B; }
+  h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); letter-spacing: -.02em; color: #0F172A; margin-bottom: 1.5rem; }
+  h2 { font-size: 1.1rem; color: var(--c); margin: 1.75rem 0 .5rem; }
+  ul { padding-left: 1.2rem; }
+  a { color: var(--c); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .back { display: inline-block; font-size: .9rem; font-weight: 600; margin-bottom: 1.5rem; }
+  .small { font-size: .85rem; color: #94A3B8; margin-top: 2rem; }
+  footer { position: relative; z-index: 1; margin-top: 2rem; font-size: .85rem; color: #94A3B8; text-align: center; }
+  footer a { color: #64748B; }
+  footer span.sep { margin: 0 .5rem; }
+</style>
+</head>
+<body>
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <main class="home">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 280" class="logo" role="img" aria-label="Friedrich-Schiller-Höhe Strausberg">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2DD4BF"/><stop offset="1" stop-color="#0E7490"/></linearGradient></defs>
+  <g transform="translate(200 20)">
+    <clipPath id="c"><rect width="120" height="120" rx="32"/></clipPath>
+    <g clip-path="url(#c)">
+      <rect width="120" height="120" fill="url(#g)"/>
+      <circle cx="84" cy="40" r="11" fill="#FDE68A"/>
+      <path d="M-4 94 Q30 48 62 72 Q84 54 124 78 V124 H-4 Z" fill="#99F6E4" opacity=".75"/>
+      <path d="M-4 104 Q44 70 124 94 V124 H-4 Z" fill="#115E59"/>
+    </g>
+  </g>
+  <text x="260" y="214" text-anchor="middle" font-family="'Inter','Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="38" font-weight="700" letter-spacing="-1" fill="#0F172A">Friedrich-Schiller-Höhe</text>
+  <text x="263.5" y="258" text-anchor="middle" font-family="'Inter','Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="20" font-weight="600" letter-spacing="7" fill="#0E7490">STRAUSBERG</text>
+</svg>
+    <div class="badge"><span class="dot"></span>Im Aufbau</div>
+    <p>Hier entsteht gerade etwas Neues.<br>Schau bald wieder vorbei.</p>
+  </main>
+  <footer>© <span class="y">2026</span> · friedrich-schiller-höhe.de<span class="sep">·</span><a href="impressum.html">Impressum</a><span class="sep">·</span><a href="datenschutz.html">Datenschutz</a></footer>
+  <script>document.querySelectorAll('.y').forEach(function(e){e.textContent=new Date().getFullYear()})</script>
+</body>
+</html>

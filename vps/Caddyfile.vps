@@ -129,7 +129,8 @@ schillerhoehe.net, www.schillerhoehe.net {
 	import statisch
 }
 
-# friedrich-schiller-höhe.de (Umlaut-Domain in Punycode-Schreibweise) leitet auf schillerhoehe.net um
+# friedrich-schiller-höhe.de (Umlaut-Domain in Punycode-Schreibweise) mit eigener Seite
 xn--friedrich-schiller-hhe-eic.de, www.xn--friedrich-schiller-hhe-eic.de {
-	redir https://schillerhoehe.net{uri} permanent
+	root * /var/www/xn--friedrich-schiller-hhe-eic.de
+	import statisch
 }
