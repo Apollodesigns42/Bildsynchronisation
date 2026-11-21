@@ -1,26 +1,22 @@
 #!/usr/bin/env bash
-# Erzeugt die Platzhalterseiten direkt auf dem VPS unter /var/www/<domain>/index.html.
-# Bereits vorhandene Seiten werden NICHT überschrieben (eigene Inhalte bleiben erhalten);
-# mit "neu" werden alle Platzhalter neu erzeugt.
-# Verwendung:  sudo vps/landingpages/install.sh [neu]
+# Spielt die Platzhalterseiten (index, Impressum, Datenschutz) aus seiten/<domain>/
+# nach /var/www/<domain>/ auf dem VPS. Vorhandene Dateien werden überschrieben,
+# die Seiten werden hier im Repository gepflegt.
+# friedrich-schiller-höhe.de hat keine eigene Seite: Caddy leitet sie auf schillerhoehe.net um.
+# Verwendung:  sudo vps/landingpages/install.sh
 set -euo pipefail
 cd "$(dirname "$0")"
 [[ $EUID -eq 0 ]] || { echo "Bitte mit sudo ausführen."; exit 1; }
 
-domains=(florian.pw sophia.lv hannah.ee karl.je schillerhoehe.net)
-
-for d in "${domains[@]}"; do
+for quelle in seiten/*/; do
+  d=$(basename "$quelle")
   ziel=/var/www/$d
   mkdir -p "$ziel"
-  if [[ -f $ziel/index.html && ${1:-} != neu ]]; then
-    echo "  $d: vorhanden, bleibt unverändert"
-    continue
-  fi
-  sed "s/__DOMAIN__/$d/g" vorlage.html > "$ziel/index.html"
-  echo "  $d: Platzhalter angelegt"
+  cp -f "$quelle"*.html "$ziel/"
+  echo "  $d: $(ls "$quelle" | tr '\n' ' ')"
 done
 
 # Zielordner für halvern-industries.com (Inhalt kommt per deploy.sh der Website)
 mkdir -p /var/www/halvern-industries.com
 chmod -R a+rX /var/www
-echo "Fertig. Danach: sudo vps/caddy-check.sh vps/Caddyfile.vps übernehmen"
+echo "Fertig. Caddy muss dafür nicht neu geladen werden."

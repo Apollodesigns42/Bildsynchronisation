@@ -87,12 +87,12 @@ Statische Seiten, die Caddy direkt aus `/var/www/<domain>/` ausliefert – unabh
 Pro Domain bei der jeweiligen Registrar A-Einträge `@` und `www` → `217.154.115.102`.
 
 **Alles liegt fertig im Projekt:** `vps/Caddyfile.vps` ist die vollständige Konfiguration des VPS (Burgenkampf, alle
-Heimserver-Dienste, halvern, Landingpages). `vps/landingpages/install.sh` legt die Platzhalterseiten direkt auf dem
+Heimserver-Dienste, halvern, Landingpages). `vps/landingpages/install.sh` spielt die Platzhalterseiten aus `vps/landingpages/seiten/` (Startseite, Impressum, Datenschutz) auf den
 VPS an. Ablauf auf dem VPS (im Projektordner):
 
 ```bash
 git pull
-sudo vps/landingpages/install.sh                    # Platzhalter nach /var/www/<domain>/
+sudo vps/landingpages/install.sh                    # Seiten nach /var/www/<domain>/ (überschreibt)
 sudo vps/caddy-check.sh vps/Caddyfile.vps               # meldet fehlende Domains, prüft die Syntax
 sudo vps/caddy-check.sh vps/Caddyfile.vps übernehmen    # erst wenn alles passt: sichern, einspielen, neu laden
 ```

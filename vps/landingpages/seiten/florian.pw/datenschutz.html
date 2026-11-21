@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Datenschutz · Florian W.</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230EA5E9'/%3E%3C/svg%3E">
+<style>
+  :root { --c: #0EA5E9; --l: #7DD3FC; }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: 'Inter','Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif;
+    color: #334155; background: #F8FAFC;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 2rem 1.25rem; overflow-x: hidden; position: relative;
+  }
+  .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: .35; z-index: 0; pointer-events: none; }
+  .b1 { width: 45vw; height: 45vw; background: var(--l); top: -15vw; left: -10vw; animation: float 14s ease-in-out infinite; }
+  .b2 { width: 35vw; height: 35vw; background: var(--c); bottom: -15vw; right: -8vw; opacity: .2; animation: float 18s ease-in-out infinite reverse; }
+  @keyframes float { 50% { transform: translate(3vw, 4vh) scale(1.08); } }
+  @media (prefers-reduced-motion: reduce) { .blob, .dot { animation: none; } }
+  main {
+    position: relative; z-index: 1;
+    background: rgba(255,255,255,.75); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.9); border-radius: 28px;
+    padding: clamp(2rem, 6vw, 4rem) clamp(1.5rem, 6vw, 4.5rem);
+    box-shadow: 0 20px 60px -20px rgba(15,23,42,.15);
+    width: 100%; max-width: 640px;
+  }
+  main.home { text-align: center; }
+  main.text { max-width: 760px; }
+  .logo { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto 2rem; }
+  .badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-size: .8rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--c); background: color-mix(in srgb, var(--c) 10%, white);
+    padding: .4rem .9rem; border-radius: 999px; margin-bottom: 1rem;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c); animation: pulse 2s infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+  p, li { font-size: 1rem; line-height: 1.65; color: #475569; }
+  main.home p { font-size: 1.05rem; color: #64748B; }
+  h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); letter-spacing: -.02em; color: #0F172A; margin-bottom: 1.5rem; }
+  h2 { font-size: 1.1rem; color: var(--c); margin: 1.75rem 0 .5rem; }
+  ul { padding-left: 1.2rem; }
+  a { color: var(--c); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .back { display: inline-block; font-size: .9rem; font-weight: 600; margin-bottom: 1.5rem; }
+  .small { font-size: .85rem; color: #94A3B8; margin-top: 2rem; }
+  footer { position: relative; z-index: 1; margin-top: 2rem; font-size: .85rem; color: #94A3B8; text-align: center; }
+  footer a { color: #64748B; }
+  footer span.sep { margin: 0 .5rem; }
+</style>
+</head>
+<body>
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <main class="text">
+    <a class="back" href="./">← Zurück zur Startseite</a>
+    <h1>Datenschutzerklärung</h1>
+    <h2>1. Verantwortlicher</h2>
+    <p>Verantwortlich für die Datenverarbeitung auf dieser Website (florian.pw) im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:</p>
+    <p style="margin-top:.75rem">Florian Würminghausen<br>Gielsdorfer Str. 6<br>15344 Strausberg<br>Deutschland<br>Telefon: <a href="tel:+4915901377810">0159 01377810</a><br>E-Mail: <a href="mailto:info@wuerminghausen.wf">info@wuerminghausen.wf</a></p>
+    <h2>2. Allgemeines</h2>
+    <p>Diese Website ist eine reine Informations- bzw. Platzhalterseite. Es werden keine Cookies gesetzt, keine Analyse- oder Tracking-Werkzeuge eingesetzt und keine Inhalte von Drittanbietern (z.&nbsp;B. Schriftarten, Karten oder Videos) geladen.</p>
+    <h2>3. Hosting (IONOS) und Server-Protokolle</h2>
+    <p>Diese Website wird auf einem virtuellen Server (VPS) betrieben, den die IONOS SE, Elgendorfer Str. 57, 56410 Montabaur, Deutschland, als Infrastruktur bereitstellt. Mit IONOS besteht ein Vertrag zur Auftragsverarbeitung nach Art.&nbsp;28 DSGVO.</p>
+    <p style="margin-top:.75rem">Für diese Website werden keine Zugriffsprotokolle (Access-Logs) gespeichert. Es wird also nicht aufgezeichnet, wer wann welche Seite aufruft.</p>
+    <p style="margin-top:.75rem">Lediglich technische Fehlermeldungen des Webservers werden im Systemprotokoll des Servers festgehalten. Diese können im Einzelfall die IP-Adresse des anfragenden Geräts sowie Datum und Uhrzeit enthalten. Die Verarbeitung erfolgt auf Grundlage von Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;f DSGVO. Das berechtigte Interesse liegt im sicheren und stabilen Betrieb des Servers, etwa zur Fehlerbehebung und zur Abwehr von Angriffen. Diese Einträge werden nicht an Dritte weitergegeben und nach 14 Tagen automatisch gelöscht.</p>
+    <h2>4. Kontakt per E-Mail oder Telefon</h2>
+    <p>Wenn Sie mich per E-Mail oder Telefon kontaktieren, werden Ihre Angaben ausschließlich zur Bearbeitung Ihrer Anfrage verarbeitet (Art.&nbsp;6 Abs.&nbsp;1 lit.&nbsp;b bzw. lit.&nbsp;f DSGVO) und gelöscht, sobald sie dafür nicht mehr benötigt werden und keine gesetzlichen Aufbewahrungspflichten entgegenstehen.</p>
+    <h2>5. Ihre Rechte</h2>
+    <p>Sie haben jederzeit das Recht auf:</p>
+    <ul>
+      <li>Auskunft über Ihre gespeicherten Daten (Art.&nbsp;15 DSGVO)</li>
+      <li>Berichtigung unrichtiger Daten (Art.&nbsp;16 DSGVO)</li>
+      <li>Löschung (Art.&nbsp;17 DSGVO)</li>
+      <li>Einschränkung der Verarbeitung (Art.&nbsp;18 DSGVO)</li>
+      <li>Datenübertragbarkeit (Art.&nbsp;20 DSGVO)</li>
+      <li>Widerspruch gegen die Verarbeitung (Art.&nbsp;21 DSGVO)</li>
+    </ul>
+    <p style="margin-top:.75rem">Wenden Sie sich dazu einfach an die oben genannten Kontaktdaten.</p>
+    <h2>6. Beschwerderecht</h2>
+    <p>Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Zuständig ist die Landesbeauftragte für den Datenschutz und für das Recht auf Akteneinsicht Brandenburg (LDA Brandenburg), Stahnsdorfer Damm 77, 14532 Kleinmachnow.</p>
+    <p class="small">Stand: November 2026</p>
+  </main>
+  <footer>© <span class="y">2026</span> · florian.pw<span class="sep">·</span><a href="impressum.html">Impressum</a><span class="sep">·</span><a href="datenschutz.html">Datenschutz</a></footer>
+  <script>document.querySelectorAll('.y').forEach(function(e){e.textContent=new Date().getFullYear()})</script>
+</body>
+</html>
