@@ -110,3 +110,12 @@ mkdir -p /etc/systemd/journald.conf.d
 printf '[Journal]\nMaxRetentionSec=14day\nMaxFileSec=1day\n' > /etc/systemd/journald.conf.d/aufbewahrung.conf
 systemctl restart systemd-journald
 ```
+
+**SSH auf dem VPS nur mit Schlüssel** (erledigt): Passwort-Anmeldung ist abgeschaltet, root nur per Schlüssel.
+Neues Gerät? Erst dessen öffentlichen Schlüssel in `/root/.ssh/authorized_keys` eintragen. Notzugang:
+KVM-Konsole im IONOS-Kundenbereich.
+
+```bash
+printf 'PasswordAuthentication no\nKbdInteractiveAuthentication no\nPermitRootLogin prohibit-password\n' > /etc/ssh/sshd_config.d/00-haerten.conf
+sshd -t && systemctl reload ssh
+```
