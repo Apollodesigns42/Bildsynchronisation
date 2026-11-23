@@ -216,7 +216,7 @@ Das Skript zeigt das **Admin-Passwort** einmal an, speichere es im Passwortmanag
 | Weg | So geht's |
 |---|---|
 | **Scanner (Heimnetz)** | Dokument auflegen, im Browser `http://<IP des Mini-PCs>:8080` öffnen, „Scannen“. Für mehrere Seiten unter „Stapel“ den manuellen Modus wählen, dann fragt es nach jeder Seite. Der Scan landet direkt im Eingangsordner, Paperless übernimmt ihn innerhalb einer Minute. |
-| **E-Mail** | In deinem Postfach einen Ordner „Paperless“ anlegen. In Paperless unter *E-Mail* ein Konto hinzufügen (GMX: `imap.gmx.net`, Port 993, SSL) und eine Regel: Ordner „Paperless“, Anhänge verarbeiten, danach als gelesen markieren. Paperless schaut alle 10 Minuten nach. Rechnungen musst du dann nur noch in diesen Ordner verschieben. |
+| **E-Mail** | In deinem Postfach einen Ordner „Paperless“ anlegen. In Paperless unter *E-Mail* ein Konto hinzufügen (GMX: `imap.gmx.net`, Port 993, SSL) und eine Regel: Ordner „Paperless“, Anhänge verarbeiten, **Maximales Alter** hochsetzen (Standard 30 Tage, ältere Mails werden sonst ignoriert), Aktion „In Ordner verschieben“ nach „Paperless-Erledigt“ (Ordner auf oberster Ebene anlegen – Unterordner findet Paperless bei GMX nicht). „Als gelesen markieren“ würde bereits gelesene Mails überspringen. Paperless schaut alle 10 Minuten nach; Protokoll: `docker logs paperless 2>&1 | grep -i mail | tail -20`. Rechnungen musst du dann nur noch in diesen Ordner verschieben. |
 | **Handy** | App „Paperless Mobile“ (Android) oder „Swift Paperless“ (iOS) mit `https://<Dokumenten-Domain>` anmelden und Dokumente abfotografieren. |
 | **Browser** | Dateien auf die Paperless-Startseite ziehen. |
 
