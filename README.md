@@ -320,11 +320,18 @@ Android, iOS) – inklusive automatischem Ausfüllen, 2FA-Codes und Passkeys.
    ```bash
    ./registrierung.sh aus
    ```
-5. Gemeinsame Passwörter: im Web-Tresor *Neue Organisation* (z.B. „Familie“) anlegen und deine Frau einladen
-   (ohne Mailserver: Einladung annehmen, indem sie sich anmeldet; danach in der Organisation „Bestätigen“ klicken).
-6. **Umzug aus 1Password:** In 1Password exportieren (`.1pux`), im Web-Tresor *Werkzeuge → Daten importieren →
-   1Password (1pux)*. Danach die Exportdatei **sicher löschen** (sie ist unverschlüsselt). Dateianhänge werden nicht
-   übernommen.
+5. **Notfallzugriff** statt gemeinsamer Organisation (jeder hat seinen eigenen Tresor): *Einstellungen →
+   Notfallzugriff → Vertrauenswürdigen Notfallkontakt hinzufügen* → Partnerkonto, Zugriffsart „Anzeigen“, Wartezeit
+   z.B. 7 Tage; danach dort „Bestätigen“. Ohne Mailserver nimmt Vaultwarden die Einladung automatisch an, meldet
+   aber auch eine Zugriffsanfrage **nicht per Mail** – gelegentlich unter *Notfallzugriff* nachsehen. Zusätzlich
+   Master-Passwort und Wiederherstellungscode in einem versiegelten Umschlag aufbewahren.
+6. **Umzug:** *Werkzeuge → Daten importieren*, Ziel „Mein Tresor“.
+   - **Aus 1Password:** in der Desktop-App *Datei → Exportieren* → Format `1PUX` → Import-Format „1Password (1pux)“.
+   - **Aus iCloud-Schlüsselbund:** in der Passwörter-App (Mac: *Ablage → Alle Passwörter in Datei exportieren*;
+     iPhone: *Passwörter → … → Daten exportieren*, je nach Version) als CSV exportieren → Import-Format
+     „Safari and macOS (csv)“.
+   Exportdateien sind **unverschlüsselt**: nicht in synchronisierte Ordner legen, nach dem Import löschen und den
+   Papierkorb leeren. Dateianhänge und Passkeys kommen in der Regel nicht mit.
 7. In den **Bitwarden-Apps** vor dem Anmelden *Selbst gehostet* wählen und die Server-URL eintragen.
 
 Die Apps haben eine **Offline-Kopie**: Ist der Server kurz nicht erreichbar, kommt man weiter an alle Passwörter.
